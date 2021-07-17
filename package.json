@@ -1,0 +1,62 @@
+{
+	"name": "fink",
+	"version": "0.0.0",
+	"license": "MIT",
+	"bin": "dist/cli.js",
+	"engines": {
+		"node": ">=10"
+	},
+	"scripts": {
+		"build": "tsc",
+		"start": "npm run build && dist/cli.js",
+		"pretest": "npm run build",
+		"test": "xo && ava"
+	},
+	"files": [
+		"dist/cli.js"
+	],
+	"dependencies": {
+		"@types/node-fetch": "^2.5.11",
+		"ink": "^3.0.8",
+		"ink-box": "^1.0.0",
+		"ink-image": "^2.0.0",
+		"ink-link": "^2.0.0",
+		"ink-progress-bar": "^3.0.0",
+		"ink-select-input": "^4.2.0",
+		"ink-spinner": "^4.0.2",
+		"ink-text-input": "^4.0.1",
+		"ink-use-stdout-dimensions": "^1.0.5",
+		"meow": "^9.0.0",
+		"node-fetch": "^2.6.1",
+		"react": "^16.14.0"
+	},
+	"devDependencies": {
+		"@ava/typescript": "^1.1.1",
+		"@sindresorhus/tsconfig": "^1.0.2",
+		"@types/react": "^17.0.14",
+		"ava": "^3.15.0",
+		"chalk": "^4.1.1",
+		"eslint-config-xo-react": "^0.25.0",
+		"eslint-plugin-react": "^7.24.0",
+		"eslint-plugin-react-hooks": "^4.2.0",
+		"ink-testing-library": "^2.1.0",
+		"typescript": "^4.3.5",
+		"xo": "^0.39.1"
+	},
+	"ava": {
+		"typescript": {
+			"extensions": [
+				"tsx"
+			],
+			"rewritePaths": {
+				"source/": "dist/"
+			}
+		}
+	},
+	"xo": {
+		"extends": "xo-react",
+		"rules": {
+			"react/prop-types": "off"
+		}
+	}
+}
