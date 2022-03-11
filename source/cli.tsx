@@ -9,22 +9,24 @@
 //
 
 import React from 'react';
-import { render } from 'ink';
+import { render, useApp } from 'ink';
 import meow from 'meow';
 import App from './app';
+import { FAClient } from './api/client';
 
-const cli = meow(`
-	Usage
-	  $ fink [search query]
-
-	Options
-		None
-
-	Examples
-	  $ fink 'attack on titan'
-`, {
+const cli = meow(`usage: fink <username|email> <password>`, {
 	flags: {
 	}
 });
+
+// Ensure arguments were supplied
+if (cli.input.length < 2) {
+	console.log(cli.help);
+	process.exit(1);
+}
+
+// Extract login args
+FAClient.shared.email = cli.input[0];
+FAClient.shared.password = cli.input[1];
 
 render(<App />);
