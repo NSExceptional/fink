@@ -46,7 +46,7 @@ interface SearchProps {
     query?: string;
 }
 
-export function Search(props: SearchProps) {
+export function Search(props: React.PropsWithChildren<SearchProps>) {
     const context = useContext(AppContext);
     const query = context.state.query ?? ''
     const [results, setResults] = useState<Show[]>([]);

@@ -12,7 +12,7 @@ import { Select, Show } from './api/model';
 import SelectInput from 'ink-select-input';
 import { AppContext } from './app';
 
-export function ShowPage(props: any) {
+export function ShowPage(props: React.PropsWithChildren<{}>) {
     const context = useContext(AppContext);
     const show = context.state.show!;
     

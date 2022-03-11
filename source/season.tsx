@@ -14,7 +14,7 @@ import SelectInput from 'ink-select-input';
 import { FAClient } from './api/client';
 import { AppContext } from './app';
 
-export function SeasonPage(props: any) {
+export function SeasonPage(props: React.PropsWithChildren<{}>) {
     const context = useContext(AppContext);
     const [episodes, setEpisodes] = useState<Episode[]|undefined>(undefined);
     const [loading, setLoading] = useState(false);
