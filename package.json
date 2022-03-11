@@ -16,9 +16,11 @@
 		"dist/cli.js"
 	],
 	"dependencies": {
+		"@types/ink-divider": "^2.0.2",
 		"@types/node-fetch": "^2.5.11",
 		"ink": "^3.0.8",
 		"ink-box": "^1.0.0",
+		"ink-divider": "^3.0.0",
 		"ink-image": "^2.0.0",
 		"ink-link": "^2.0.0",
 		"ink-progress-bar": "^3.0.0",
@@ -28,7 +30,8 @@
 		"ink-use-stdout-dimensions": "^1.0.5",
 		"meow": "^9.0.0",
 		"node-fetch": "^2.6.1",
-		"react": "^16.14.0"
+		"react": "^16.14.0",
+		"youtube-dl-wrap": "^2.1.0"
 	},
 	"devDependencies": {
 		"@ava/typescript": "^1.1.1",
