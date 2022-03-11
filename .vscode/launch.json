@@ -11,7 +11,9 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
+            "envFile": "${workspaceFolder}/.env",
             "program": "${workspaceFolder}/dist/cli.js",
+            "args": ["${config:FNK_USER}", "${config:FNK_PASS}"],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}"
         }
