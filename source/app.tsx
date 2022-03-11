@@ -9,12 +9,15 @@
 import React, { useState } from 'react';
 import { useInput } from 'ink';
 import { Search } from './search';
-import { BaseSeason, Show } from './api/model';
+import { BaseSeason, Episode, Show } from './api/model';
 import { ShowPage } from './show';
 import { SeasonPage } from './season';
 import { Setter, VoidSetter } from './api/types';
+import { DownloadManager } from './dl-manager';
 
 interface AppState {
+    /** A message to be shown at the bottom of every page */
+    status?: string;
     /** The current search string */
     query?: string;
     /** The currently selected show */
@@ -25,6 +28,7 @@ interface AppState {
 
 interface IAppContext {
     state: AppState;
+    addDownload: Setter<Episode>;
     set: {
         query: Setter<string>;
         show: Setter<Show>;
@@ -33,12 +37,13 @@ interface IAppContext {
 }
 
 export const AppContext = React.createContext<IAppContext>({
-    state: {},
+    state: { },
+    addDownload: VoidSetter,
     set: { query: VoidSetter, show: VoidSetter, season: VoidSetter }
 });
 
 function App() {
-    const [state, _setState] = useState<AppState>({});
+    const [state, _setState] = useState<AppState>({ status: 'No downloads' });
     const setState = (newState: Partial<AppState>) => {
         _setState({ ...state, ...newState });
     }
@@ -46,6 +51,11 @@ function App() {
     // Setup app context
     const context: IAppContext = {
         state: state,
+        addDownload: (episode) => {
+            DownloadManager.shared.addDownload(episode, (status) => {
+                setState({ status: status });
+            });
+        },
         set: {
             query: (string) => {
                 setState({ query: string })

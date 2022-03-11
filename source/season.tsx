@@ -13,6 +13,7 @@ import { Episode, Select } from './api/model';
 import SelectInput from 'ink-select-input';
 import { FAClient } from './api/client';
 import { AppContext } from './app';
+import { DownloadManager } from './dl-manager';
 
 export function SeasonPage(props: React.PropsWithChildren<{}>) {
     const context = useContext(AppContext);
