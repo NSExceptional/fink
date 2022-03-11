@@ -8,7 +8,7 @@
 
 import React, { ReactNode, useContext, useState } from 'react';
 import { Page } from './page';
-import { Text } from 'ink';
+import { Text, useInput } from 'ink';
 import { Episode, Select } from './api/model';
 import SelectInput from 'ink-select-input';
 import { FAClient } from './api/client';
@@ -22,6 +22,24 @@ export function SeasonPage(props: React.PropsWithChildren<{}>) {
     
     const title = context.state.season!.name;
     
+    function downloadAll() {
+        if (!episodes) return;
+        
+        for (const e of episodes) {
+            // Pull show's slug from context
+            e.showSlug = context.state.show!.slug;
+        }
+        
+        context.downloadAll(episodes);
+    }
+    
+    // Download all episodes when user presses some key
+    // useInput((input, key) => {
+    //     if (input == 'a') {
+    //         downloadAll();
+    //     }
+    // });
+    
     function content(): ReactNode {
         // While loading episodes...
         if (loading) {
@@ -33,9 +51,28 @@ export function SeasonPage(props: React.PropsWithChildren<{}>) {
             return <Text>Error loading episodes</Text>
         }
         
-        return <SelectInput limit={10} items={Select.episodes(episodes)} onSelect={(item) => {
-            const choice = episodes.filter(e => e.slug == item.value)[0];
-            // context.set.episode(choice!);
+        // Check if any episodes are already downloading
+        for (const e of episodes) {
+            e.downloading = DownloadManager.shared.episodeIsDownloading(e);
+        }
+        
+        // Add button to download all episodes
+        const allItem = { label: 'Download All', value: '*' };
+        const selectItems = [allItem].concat(Select.episodes(episodes));
+        
+        return <SelectInput limit={10} items={selectItems} onSelect={(item) => {
+            // Did we select the 'All' item?
+            if (item.value == '*') {
+                downloadAll();
+            } else {
+                // Enqueue a new download
+                const choice = episodes.filter(e => e.slug == item.value)[0];
+                if (choice && !choice.downloading) {
+                    // Pull show's slug from context
+                    choice.showSlug = context.state.show!.slug;
+                    context.addDownload(choice);
+                }
+            }
         }} />;
     }
     

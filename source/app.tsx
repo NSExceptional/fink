@@ -7,7 +7,7 @@
 //
 
 import React, { useState } from 'react';
-import { useInput } from 'ink';
+import { useInput, Text } from 'ink';
 import { Search } from './search';
 import { BaseSeason, Episode, Show } from './api/model';
 import { ShowPage } from './show';
@@ -29,6 +29,7 @@ interface AppState {
 interface IAppContext {
     state: AppState;
     addDownload: Setter<Episode>;
+    downloadAll: Setter<Episode[]>;
     set: {
         query: Setter<string>;
         show: Setter<Show>;
@@ -39,6 +40,7 @@ interface IAppContext {
 export const AppContext = React.createContext<IAppContext>({
     state: { },
     addDownload: VoidSetter,
+    downloadAll: VoidSetter,
     set: { query: VoidSetter, show: VoidSetter, season: VoidSetter }
 });
 
@@ -53,6 +55,11 @@ function App() {
         state: state,
         addDownload: (episode) => {
             DownloadManager.shared.addDownload(episode, (status) => {
+                setState({ status: status });
+            });
+        },
+        downloadAll: (episodes) => {
+            DownloadManager.shared.downloadAll(episodes, (status) => {
                 setState({ status: status });
             });
         },
