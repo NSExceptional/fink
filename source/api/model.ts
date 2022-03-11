@@ -6,6 +6,8 @@
 //  Copyright © 2021 Tanner Bennett. All rights reserved.
 //
 
+import { Progress } from 'youtube-dl-wrap';
+
 export interface APIError {
     status_message?: string;
 }
@@ -79,6 +81,12 @@ export interface Episode extends Media {
     shortCode: string;
     isSubRequired: boolean;
     // videoList: any[];
+    
+    // My additions
+    showSlug: string;
+    downloading?: boolean;
+    progress?: Progress;
+    error?: string;
 }
 
 export interface SelectOption {
@@ -102,7 +110,9 @@ export class Select {
     
     static episodes(eps: Episode[]): SelectOption[] {
         return eps.map(s => {
-            return { label: s.name, value: s.slug }
+            // Show a * in front of queued episodes
+            const name = s.downloading ? '*' + s.name : s.name;
+            return { label: name, value: s.slug }
         });
     }
 }
