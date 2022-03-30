@@ -1,6 +1,6 @@
 //
 //  dl-manager.ts
-//  fink
+//  fundl
 //  
 //  Created by Tanner Bennett on 2021-08-04
 //  Copyright © 2021 Tanner Bennett. All rights reserved.

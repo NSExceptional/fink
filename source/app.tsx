@@ -1,6 +1,6 @@
 //
 //  app.tsx
-//  fink
+//  fundl
 //  
 //  Created by Tanner Bennett on 1985-10-26
 //  Copyright © 2021 Tanner Bennett. All rights reserved.

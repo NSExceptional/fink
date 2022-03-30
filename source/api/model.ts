@@ -1,6 +1,6 @@
 //
 //  model.ts
-//  fink
+//  fundl
 //  
 //  Created by Tanner Bennett on 2021-07-16
 //  Copyright © 2021 Tanner Bennett. All rights reserved.

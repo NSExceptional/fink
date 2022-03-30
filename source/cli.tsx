@@ -2,7 +2,7 @@
 
 //
 //  cli.tsx
-//  fink
+//  fundl
 //  
 //  Created by Tanner Bennett on 2021-07-13
 //  Copyright © 2021 Tanner Bennett. All rights reserved.
@@ -14,7 +14,7 @@ import meow from 'meow';
 import App from './app';
 import { FAClient } from './api/client';
 
-const cli = meow(`usage: fink <username|email> <password>`, {
+const cli = meow(`usage: fundl <username|email> <password>`, {
 	flags: {
 	}
 });

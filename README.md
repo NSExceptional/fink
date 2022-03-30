@@ -1,17 +1,17 @@
-# fink: A Command Line Funimation Video Downloader
+# fundl: A Command Line Funimation Video Downloader
 
 
 ## Install
 
 ```bash
-$ npm install --global fink
+$ npm install --global fundl
 ```
 
 
 ## Usage
 
 ```
-$ fink --help
+$ fundl --help
 
-  usage: fink <username|email> <password>
+  usage: fundl <username|email> <password>
 ```
