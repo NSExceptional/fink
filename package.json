@@ -1,6 +1,6 @@
 {
 	"name": "fundl",
-	"version": "0.0.0",
+	"version": "1.0.2",
 	"license": "MIT",
 	"bin": "dist/cli.js",
 	"engines": {
@@ -12,9 +12,6 @@
 		"pretest": "npm run build",
 		"test": "xo && ava"
 	},
-	"files": [
-		"dist/cli.js"
-	],
 	"dependencies": {
 		"@types/ink-divider": "^2.0.2",
 		"@types/node-fetch": "^2.5.11",
