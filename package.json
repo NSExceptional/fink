@@ -1,8 +1,11 @@
 {
 	"name": "fundl",
-	"version": "1.0.2",
+	"version": "0.0.2",
 	"license": "MIT",
 	"bin": "dist/cli.js",
+	"directories": {
+		"bin": "dist"
+	},
 	"engines": {
 		"node": ">=10"
 	},
