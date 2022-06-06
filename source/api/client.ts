@@ -7,7 +7,7 @@
 //
 
 import { APIError, BaseSeason, Episode, Season, Show } from './model';
-import fetch from 'node-fetch';
+import { fetch } from 'fetch-h2';
 import * as qs from 'querystring';
 import YoutubeDlWrap, { Progress } from 'youtube-dl-wrap';
 
@@ -39,7 +39,7 @@ export class FAClient {
         }
         
         return [...loginArgs,
-            '--cookies', '~/Desktop/funimation_cookies.txt',
+            // '--cookies', '~/Desktop/funimation_cookies.txt',
             '--extractor-args', 'funimation:language=english',
             '--cookies-from-browser', 'chrome',
             '--no-check-certificate',

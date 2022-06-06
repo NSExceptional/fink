@@ -7,7 +7,7 @@
 		"bin": "dist"
 	},
 	"engines": {
-		"node": ">=10"
+		"node": ">=12"
 	},
 	"scripts": {
 		"build": "tsc",
@@ -17,7 +17,7 @@
 	},
 	"dependencies": {
 		"@types/ink-divider": "^2.0.2",
-		"@types/node-fetch": "^2.5.11",
+		"fetch-h2": "^3.0.2",
 		"ink": "^3.0.8",
 		"ink-box": "^1.0.0",
 		"ink-divider": "^3.0.0",
@@ -29,7 +29,6 @@
 		"ink-text-input": "^4.0.1",
 		"ink-use-stdout-dimensions": "^1.0.5",
 		"meow": "^9.0.0",
-		"node-fetch": "^2.6.1",
 		"react": "^16.14.0",
 		"youtube-dl-wrap": "^2.1.0"
 	},
@@ -44,7 +43,7 @@
 		"eslint-plugin-react-hooks": "^4.2.0",
 		"ink-testing-library": "^2.1.0",
 		"typescript": "^4.3.5",
-		"xo": "^0.39.1"
+		"xo": "^0.49.0"
 	},
 	"ava": {
 		"typescript": {
