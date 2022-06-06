@@ -10,6 +10,8 @@ import { APIError, BaseSeason, Episode, Season, Show } from './model';
 import { fetch } from 'fetch-h2';
 import * as qs from 'querystring';
 import YoutubeDlWrap, { Progress } from 'youtube-dl-wrap';
+import * as os from 'node:os';
+import * as fs from 'fs';
 
 enum Endpoint {
     search = "/v1/shows/search",
@@ -44,6 +46,18 @@ export class FAClient {
             '--cookies-from-browser', 'chrome',
             '--no-check-certificate',
         ];
+    }
+    
+    get ytdlPath(): string {
+        if (os.platform() == 'win32') {
+            return "C:\\Program Files\\yt-dlp\\yt-dlp.exe"
+        } else {
+            return "/usr/local/bin/yt-dlp";
+        }
+    }
+    
+    get ytdlInstalled(): boolean {
+        return fs.existsSync(this.ytdlPath);
     }
     
     get<T>(endpoint: string, urlParams: qs.ParsedUrlQueryInput = {}, key?: string): Promise<T> {
@@ -90,10 +104,11 @@ export class FAClient {
     
     downloadEpisode(episode: Episode, progress: (progress: Progress) => void): Promise<void> {
         const url = `https://www.funimation.com/en/shows/${episode.showSlug}/${episode.slug}`
+        const exe = this.ytdlPath;
         const args = [...this.ytdlArgs, url];
         
         return new Promise((resolve, reject) => {
-            new YoutubeDlWrap('/usr/local/bin/yt-dlp').exec(args)
+            new YoutubeDlWrap(exe).exec(args)
                 .on('progress', progress)
                 .on('close', resolve)
                 .on('error', reject);

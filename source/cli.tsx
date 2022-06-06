@@ -27,6 +27,12 @@ if (cli.input.length < 2) {
 	process.exit(1);
 }
 
+// Ensure yt-dlp is installed
+if (!FAClient.shared.ytdlInstalled) {
+	console.log(`yt-dlp is not installed. Expected at:\n${FAClient.shared.ytdlPath}`);
+	process.exit(1);
+}
+
 // Extract login args
 FAClient.shared.email = cli.input[0];
 FAClient.shared.password = cli.input[1];
