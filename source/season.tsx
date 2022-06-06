@@ -20,7 +20,11 @@ export function SeasonPage(props: React.PropsWithChildren<{}>) {
     const [episodes, setEpisodes] = useState<Episode[]|undefined>(undefined);
     const [loading, setLoading] = useState(false);
     
-    const title = context.state.season!.name;
+    const showName = context.state.show!.name;
+    const seasonName = context.state.season!.name;
+    const numEpisodes = episodes?.length ?? 0;
+    
+    const title = `${showName} / ${seasonName} / ${numEpisodes} episode(s)`;
     
     function downloadAll() {
         if (!episodes) return;
