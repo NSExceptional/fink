@@ -14,7 +14,9 @@ import meow from 'meow';
 import App from './app';
 import { FAClient } from './api/client';
 
-const cli = meow(`usage: fundl <username|email> <password>`, {
+const cli = meow(`
+usage: fundl <username|email> <password>
+Log into Funimation in Google Chrome, too, for downloads to work.`, {
 	flags: {
 	}
 });
