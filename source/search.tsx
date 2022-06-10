@@ -64,8 +64,10 @@ export function Search(props: React.PropsWithChildren<SearchProps>) {
             <UncontrolledTextInput
                 placeholder='my hero academia'
                 onSubmit={context.set.query}
-                // Currently can't use value with UncontrolledTextInput??
-                // value={context.state.query ?? ''} 
+                initialValue={context.state.query ?? ''} 
+                // 1. onChange doesn't exist here
+                // 2. Setting query would break my search logic above
+                // onChange={context.set.query}
             />
         </Box>
         <Space />
