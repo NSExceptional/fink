@@ -6,14 +6,16 @@
 //  Copyright © 2021 Tanner Bennett. All rights reserved.
 //
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useInput, Text } from 'ink';
 import { Search } from './search';
-import { BaseSeason, Episode, Show } from './api/model';
+import { BaseSeason, Episode, Season, Show } from './api/model';
 import { ShowPage } from './show';
 import { SeasonPage } from './season';
 import { Setter, VoidSetter } from './api/types';
 import { DownloadManager } from './dl-manager';
+import { FAClient } from './api/client.js';
+import { CWDChanger } from './cd.js';
 
 interface AppState {
     /** A message to be shown at the bottom of every page */
@@ -23,7 +25,12 @@ interface AppState {
     /** The currently selected show */
     show?: Show;
     /** The currently selected season */
-    season?: BaseSeason;
+    season?: Season;
+    
+    /** Whether we are changing the working directory */
+    cd: boolean;
+    /** Current working directory, derived from DownloadManager */
+    cwd: string;
 }
 
 interface IAppContext {
@@ -31,21 +38,25 @@ interface IAppContext {
     addDownload: Setter<Episode>;
     downloadAll: Setter<Episode[]>;
     set: {
+        cd: Setter<boolean>;
         query: Setter<string>;
         show: Setter<Show>;
-        season: Setter<BaseSeason>;
+        season: Setter<Season>;
     }
 }
 
+const EmptyAppState: AppState = { status: 'No downloads', cd: false, cwd: '' };
+
 export const AppContext = React.createContext<IAppContext>({
-    state: { },
+    state: EmptyAppState,
     addDownload: VoidSetter,
     downloadAll: VoidSetter,
-    set: { query: VoidSetter, show: VoidSetter, season: VoidSetter }
+    set: { cd: VoidSetter, query: VoidSetter, show: VoidSetter, season: VoidSetter }
 });
 
 function App() {
-    const [state, _setState] = useState<AppState>({ status: 'No downloads' });
+    const dlmanager = DownloadManager.shared;
+    const [state, _setState] = useState<AppState>(EmptyAppState);
     const setState = (newState: Partial<AppState>) => {
         _setState({ ...state, ...newState });
     }
@@ -54,16 +65,15 @@ function App() {
     const context: IAppContext = {
         state: state,
         addDownload: (episode) => {
-            DownloadManager.shared.addDownload(episode, (status) => {
-                setState({ status: status });
-            });
+            dlmanager.addDownload(episode);
         },
         downloadAll: (episodes) => {
-            DownloadManager.shared.downloadAll(episodes, (status) => {
-                setState({ status: status });
-            });
+            dlmanager.downloadAll(episodes);
         },
         set: {
+            cd: (flag) => {
+                setState({ cd: flag })
+            },
             query: (string) => {
                 setState({ query: string })
             },
@@ -76,8 +86,22 @@ function App() {
         }
     };
     
+    // Update state-setters
+    dlmanager.addDownloadCallback = (status) => {
+        setState({ status: status });
+    };
+    dlmanager.downloadAllCallback = (status) => {
+        setState({ status: status });
+    };
+    dlmanager.changeDirectoryCallback = (dir) => {
+        setState({ cwd: dir });
+    }
+    
     // Return the page appropriate for the current state
     function getPage(): JSX.Element {
+        if (state.cd) {
+            return <CWDChanger />;
+        }
         if (state.show) {
             if (state.season) {
                 return <SeasonPage />;
@@ -91,7 +115,10 @@ function App() {
     
     // Handle escape key press
     function goBack() {
-        if (state.show) {
+        if (state.cd) {
+            setState({ cd: false });
+        }
+        else if (state.show) {
             if (state.season) {
                 setState({ season: undefined });
             } else {
@@ -103,7 +130,18 @@ function App() {
     // Go back when user presses esc
     useInput((input, key) => {
         if (key.escape) {
-            goBack();
+            return goBack();
+        }
+        
+        if (key.ctrl) {
+            // Go up a directory
+            if (input == 'u') {
+                return dlmanager.changeDirectory('..');
+            }
+            // Change directory
+            if (input == 'd') {
+                return setState({ cd: true });
+            }
         }
     });
     

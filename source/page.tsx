@@ -11,6 +11,7 @@ import { Box, Text } from 'ink';
 import useStdoutDimensions from 'ink-use-stdout-dimensions';
 import { AppContext } from './app';
 import Divider from 'ink-divider';
+import { DownloadManager } from './dl-manager.js';
 
 interface PageProps {
     title: string;
@@ -36,5 +37,6 @@ export function Page(props: React.PropsWithChildren<PageProps>) {
         </Box>
         <Divider width={w - 4} padding={0} />
         <Text>{context.state.status}</Text>
+        <Text>Saving to {DownloadManager.shared.currentDirectory} | Press ctrl+D to change directory</Text>
     </Box>;
 }

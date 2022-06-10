@@ -9,6 +9,9 @@
 import { FAClient } from './api/client';
 import { Episode } from './api/model';
 
+type StatusUpdater = (status: string) => void;
+type StatusUpdaterFuture = () => StatusUpdater;
+
 export class DownloadManager {
     static shared = new DownloadManager();
     
@@ -51,6 +54,27 @@ export class DownloadManager {
         return `No active downloads`;
     }
     
+    private addDownloadCallbackFuture: StatusUpdaterFuture = () => {
+        return this.addDownloadCallback;
+    }
+    
+    private downloadAllCallbackFuture: StatusUpdaterFuture = () => {
+        return this.downloadAllCallback;
+    }
+    
+    addDownloadCallback: StatusUpdater = () => {};
+    downloadAllCallback: StatusUpdater = () => {};
+    changeDirectoryCallback: (path: string) => void = (_) => {};
+    
+    get currentDirectory(): string {
+        return process.cwd();
+    }
+    
+    changeDirectory(relativePath: string) {
+        process.chdir(relativePath);
+        this.changeDirectoryCallback(this.currentDirectory);
+    }
+    
     episodeIsDownloading(episode: Episode): boolean {
         return this.downloads.map(e => e.id).includes(episode.id);
     }
@@ -66,7 +90,7 @@ export class DownloadManager {
         return false;
     }
     
-    private async downloadNextEpisode(callback: (status: string) => void) {
+    private async downloadNextEpisode(callback: StatusUpdaterFuture) {
         // Are we already downloading something?
         if (this.currentDownload?.inProgress) {
             return;
@@ -89,7 +113,7 @@ export class DownloadManager {
                 this.downloads.splice(idx, 1);
                 
                 // Update status
-                callback(this.status);
+                callback()(this.status);
             }, 2000);
             
             // Allow starting new downloads
@@ -104,7 +128,7 @@ export class DownloadManager {
             await FAClient.shared.downloadEpisode(episode, (progress) => {
                 // Update status
                 episode.progress = progress;
-                callback(this.status);
+                callback()(this.status);
             });
             
             unqueueAndStartNext();
@@ -116,13 +140,13 @@ export class DownloadManager {
             episode.downloading = false;
             
             // Update status
-            callback(this.status);
+            callback()(this.status);
             
             unqueueAndStartNext();
         }
     }
     
-    async addDownload(episode: Episode, callback: (status: string) => void) {
+    async addDownload(episode: Episode) {
         const inQueue = this.episodeIsDownloading(episode);
         const didFail = this.episodeDownloadFailed(episode);
         
@@ -133,15 +157,16 @@ export class DownloadManager {
             } else {
                 // Enqueue download, update status
                 this.downloads.push(episode);
-                callback(this.status);
+                this.addDownloadCallback(this.status);
             }
             
             // Start downloading, if not already
-            this.downloadNextEpisode(callback);
+            this.downloadNextEpisode(this.addDownloadCallbackFuture);
         }
     }
     
-    async downloadAll(episodes: Episode[], callback: (status: string) => void) {
+    async downloadAll(episodes: Episode[]) {
+        
         // Ignore queued episodes and failed episodes
         episodes = episodes.filter(e => {
             const inQueue = this.episodeIsDownloading(e);
@@ -152,9 +177,9 @@ export class DownloadManager {
         
         // Enqueue downloads, update status
         this.downloads.push(...episodes);
-        callback(this.status);
+        this.downloadAllCallback(this.status);
         
         // Start downloading, if not already
-        this.downloadNextEpisode(callback);
+        this.downloadNextEpisode(this.downloadAllCallbackFuture);
     }
 }
