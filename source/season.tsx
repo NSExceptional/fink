@@ -9,14 +9,16 @@
 import React, { ReactNode, useContext, useState } from 'react';
 import { Page } from './page';
 import { Text, useInput } from 'ink';
-import { Episode, Select } from './api/model';
+import { Episode, Select, SelectOption } from './api/model';
 import SelectInput from 'ink-select-input';
 import { FAClient } from './api/client';
 import { AppContext } from './app';
 import { DownloadManager } from './dl-manager';
+import clipboard from 'clipboardy';
 
 export function SeasonPage(props: React.PropsWithChildren<{}>) {
     const context = useContext(AppContext);
+    const [selectedEpisode, setSelectedEpisode] = useState<Episode|undefined>(undefined);
     const [episodes, setEpisodes] = useState<Episode[]|undefined>(undefined);
     const [loading, setLoading] = useState(false);
     
@@ -25,6 +27,11 @@ export function SeasonPage(props: React.PropsWithChildren<{}>) {
     const numEpisodes = episodes?.length ?? 0;
     
     const title = `${showName} / ${seasonName} / ${numEpisodes} episode(s)`;
+    
+    function episodeFor(item: SelectOption): Episode | undefined {
+        if (item.value == '*') return undefined;
+        return episodes?.filter(e => e.slug == item.value)[0];
+    }
     
     function downloadAll() {
         if (!episodes) return;
@@ -43,6 +50,13 @@ export function SeasonPage(props: React.PropsWithChildren<{}>) {
     //         downloadAll();
     //     }
     // });
+    
+    useInput((input, key) => {
+        if (input == 'l' && selectedEpisode) {
+            const url = FAClient.shared.urlForEpisode(selectedEpisode)!;
+            clipboard.writeSync(url);
+        }
+    });
     
     function content(): ReactNode {
         // While loading episodes...
@@ -70,13 +84,16 @@ export function SeasonPage(props: React.PropsWithChildren<{}>) {
                 downloadAll();
             } else {
                 // Enqueue a new download
-                const choice = episodes.filter(e => e.slug == item.value)[0];
+                const choice = episodeFor(item);
                 if (choice && !choice.downloading) {
                     // Pull show's slug from context
                     choice.showSlug = context.state.show!.slug;
                     context.addDownload(choice);
                 }
             }
+        }}
+        onHighlight={(item) => {
+            setSelectedEpisode(episodeFor(item));
         }} />;
     }
     

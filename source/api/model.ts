@@ -61,9 +61,9 @@ export interface BaseSeason extends Media {
     number: number;
 }
 
+/** Custom subtype, adds reference to show */
 export interface Season extends BaseSeason {
     show: Slugged;
-    episodes: Episode[];
 }
 
 export interface Episode extends Media {
@@ -83,7 +83,7 @@ export interface Episode extends Media {
     // videoList: any[];
     
     // My additions
-    showSlug: string;
+    showSlug?: string;
     downloading?: boolean;
     progress?: Progress;
     error?: string;

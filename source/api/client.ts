@@ -88,22 +88,29 @@ export class FAClient {
         return this.get(Endpoint.search, { searchTerms: qs.escape(query) }, 'list');
     }
     
-    listSeasons(show: Show): Promise<BaseSeason[]> {
-        return this.get(Endpoint.listSeasons + show.slug, {}, 'seasons');
+    async listSeasons(show: Show): Promise<Season[]> {
+        const baseSeasons: BaseSeason[] = await this.get(Endpoint.listSeasons + show.slug, {}, 'seasons');
+        // Add show
+        const seasons = (baseSeasons as Season[]).map(s => {
+            s.show = show;
+            return s;
+        });
+        
+        return seasons;
     }
     
-    async listEpisodes(season: BaseSeason): Promise<Episode[]> {
+    async listEpisodes(season: Season): Promise<Episode[]> {
         const episodes: Episode[] = await this.get(Endpoint.listEpisodes + season.id, {}, 'episodes');
-        // // Add show slug
-        // episodes.forEach(e => {
-        //     e.showSlug = season.show.slug;
-        // });
+        // Add show slug
+        episodes.forEach(e => {
+            e.showSlug = season.show.slug;
+        });
         
         return episodes;
     }
     
     downloadEpisode(episode: Episode, progress: (progress: Progress) => void): Promise<void> {
-        const url = `https://www.funimation.com/en/shows/${episode.showSlug}/${episode.slug}`
+        const url = this.urlForEpisode(episode)!;
         const exe = this.ytdlPath;
         const args = [...this.ytdlArgs, url];
         
@@ -113,5 +120,10 @@ export class FAClient {
                 .on('close', resolve)
                 .on('error', reject);
         });
+    }
+    
+    urlForEpisode(episode: Episode|undefined): string | undefined {
+        if (!episode || !episode.showSlug) return undefined;
+        return `https://www.funimation.com/en/shows/${episode.showSlug}/${episode.slug}`;
     }
 }
