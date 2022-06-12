@@ -9,10 +9,11 @@
 import React, { useContext, useState } from 'react';
 import { Page } from './page';
 import { AppContext } from './app';
-import { Text, Box, Spacer } from 'ink';
+import { Text, Spacer } from 'ink';
 import { UncontrolledTextInput } from 'ink-text-input';
 import { DownloadManager } from './dl-manager.js';
 import * as fs from 'fs';
+import { VSpace } from './vspace.js';
 
 export function CWDChanger(props: React.PropsWithChildren<{}>) {
     const context = useContext(AppContext);
@@ -46,13 +47,13 @@ export function CWDChanger(props: React.PropsWithChildren<{}>) {
     // I use UncontrolledTextInput so I don't have to map
     // `value` to some state variable until submission. 
     return <Page title='Change Download Location'>
-        <Box paddingTop={1} paddingBottom={1} flexDirection='column'>
-            <UncontrolledTextInput
-                placeholder='C:/Users/you/Desktop/'
-                onSubmit={cd}
-                initialValue={DownloadManager.shared.currentDirectory}
-                />
-        </Box>
+        <UncontrolledTextInput
+            placeholder='C:/Users/you/Desktop/'
+            onSubmit={cd}
+            initialValue={DownloadManager.shared.currentDirectory}
+            />
+        
+        <VSpace />
         <Text>Hit Return to confirm or Escape to cancel.</Text>
         <CDMessage />
     </Page>;
