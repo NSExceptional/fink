@@ -33,14 +33,17 @@ export function SeasonPage(props: React.PropsWithChildren<{}>) {
         return episodes?.filter(e => e.slug == item.value)[0];
     }
     
+    function addDownloadMetadataToEpisode(e: Episode) {
+        // Pull show's slug from context
+        e.showSlug = context.state.show!.slug;
+        e.showName = context.state.show!.name;
+        e.collection = context.state.season!.name;
+    }
+    
     function downloadAll() {
         if (!episodes) return;
         
-        for (const e of episodes) {
-            // Pull show's slug from context
-            e.showSlug = context.state.show!.slug;
-        }
-        
+        episodes.forEach(addDownloadMetadataToEpisode);
         context.downloadAll(episodes);
     }
     
@@ -86,8 +89,7 @@ export function SeasonPage(props: React.PropsWithChildren<{}>) {
                 // Enqueue a new download
                 const choice = episodeFor(item);
                 if (choice && !choice.downloading) {
-                    // Pull show's slug from context
-                    choice.showSlug = context.state.show!.slug;
+                    addDownloadMetadataToEpisode(choice);
                     context.addDownload(choice);
                 }
             }

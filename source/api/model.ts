@@ -87,6 +87,11 @@ export interface Episode extends Media {
     downloading?: boolean;
     progress?: Progress;
     error?: string;
+    
+    /** i.e. 'Dragon Ball Z' */
+    showName?: string;
+    /** i.e. 'Season 1' or 'OVAs' */
+    collection?: string;
 }
 
 export interface SelectOption {
