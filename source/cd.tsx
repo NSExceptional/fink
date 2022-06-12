@@ -1,9 +1,9 @@
 //
-//  show.tsx
+//  cd.tsx
 //  fundl
 //  
-//  Created by Tanner Bennett on 2021-07-17
-//  Copyright © 2021 Tanner Bennett. All rights reserved.
+//  Created by Tanner Bennett on 2022-06-09
+//  Copyright © 2022 Tanner Bennett. All rights reserved.
 //
 
 import React, { useContext, useState } from 'react';
