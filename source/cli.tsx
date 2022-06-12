@@ -24,6 +24,10 @@ Log into Funimation in Google Chrome, too, for downloads to work.`, {
 			alias: 'f',
 			default: false,
 		},
+		startIn: {
+			type: 'string',
+			alias: 's'
+		}
 	}
 });
 
@@ -45,5 +49,8 @@ FAClient.shared.password = cli.input[1];
 
 // Extract other flags
 DownloadManager.shared.createFolders = cli.flags.createFolders;
+if (cli.flags.startIn) {
+	DownloadManager.shared.changeDirectory(cli.flags.startIn);
+}
 
 render(<App />);
