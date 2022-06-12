@@ -8,6 +8,7 @@
 
 import { FAClient } from './api/client';
 import { Episode } from './api/model';
+import * as fs from 'fs';
 
 type StatusUpdater = (status: string) => void;
 type StatusUpdaterFuture = () => StatusUpdater;
@@ -17,6 +18,9 @@ export class DownloadManager {
     
     private downloads: Episode[] = [];
     private currentDownload: { inProgress: boolean, episode: Episode } | undefined;
+    
+    /** Whether or not to create folders like 'Show/Season 1/' to download into */
+    createFolders = false;
     
     // Technically, there is a race condition here... currentDownload is excluded
     // from the queue, but it is not removed from the queue until 2 seconds after
@@ -122,6 +126,14 @@ export class DownloadManager {
             // Download next episode from queue
             this.downloadNextEpisode(callback);
         };
+        
+        // Do we want to create a folder first?
+        if (this.createFolders) {
+            const path = `./${episode.showName!}/${episode.collection!}`;
+            // const fullPath = `${this.currentDirectory}/${path}`;
+            fs.mkdirSync(path, { recursive: true });
+            episode.preferredDownloadPath = path;
+        }
         
         try {
             // Start new download

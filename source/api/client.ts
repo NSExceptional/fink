@@ -114,6 +114,12 @@ export class FAClient {
         const exe = this.ytdlPath;
         const args = [...this.ytdlArgs, url];
         
+        // Add output directory if specified
+        if (episode.preferredDownloadPath) {
+            args.push('-o');
+            args.push(`${episode.preferredDownloadPath}/%(title)s.%(ext)s`);
+        }
+        
         return new Promise((resolve, reject) => {
             new YoutubeDlWrap(exe).exec(args)
                 .on('progress', progress)

@@ -13,11 +13,17 @@ import { render, useApp } from 'ink';
 import meow from 'meow';
 import App from './app';
 import { FAClient } from './api/client';
+import { DownloadManager } from './dl-manager.js';
 
 const cli = meow(`
 usage: fundl <username|email> <password>
 Log into Funimation in Google Chrome, too, for downloads to work.`, {
 	flags: {
+		createFolders: {
+			type: 'boolean',
+			alias: 'f',
+			default: false,
+		},
 	}
 });
 
@@ -36,5 +42,8 @@ if (!FAClient.shared.ytdlInstalled) {
 // Extract login args
 FAClient.shared.email = cli.input[0];
 FAClient.shared.password = cli.input[1];
+
+// Extract other flags
+DownloadManager.shared.createFolders = cli.flags.createFolders;
 
 render(<App />);

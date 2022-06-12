@@ -88,6 +88,8 @@ export interface Episode extends Media {
     progress?: Progress;
     error?: string;
     
+    /** A relative path to download the episode to. */
+    preferredDownloadPath?: string;
     /** i.e. 'Dragon Ball Z' */
     showName?: string;
     /** i.e. 'Season 1' or 'OVAs' */
