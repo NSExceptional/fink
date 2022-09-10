@@ -34,10 +34,14 @@ export function SeasonPage(props: React.PropsWithChildren<{}>) {
     }
     
     function addDownloadMetadataToEpisode(e: Episode) {
+        const show = context.state.show!;
+        const season = context.state.season!;
+        
         // Pull show's slug from context
-        e.showSlug = context.state.show!.slug;
-        e.showName = context.state.show!.name;
-        e.collection = context.state.season!.name;
+        e.showSlug = show.slug;
+        e.showName = show.name;
+        e.collection = season.name;
+        e.archive = `${show.slug}-${season.name}.txt`;
     }
     
     function downloadAll() {

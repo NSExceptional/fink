@@ -120,6 +120,8 @@ export class FAClient {
         if (episode.preferredDownloadPath) {
             args.push('-o');
             args.push(`${episode.preferredDownloadPath}/${prefix} %(title)s.%(ext)s`);
+            args.push('--download-archive');
+            args.push(`${episode.preferredDownloadPath}/${episode.archive!}`);
         }
         
         return new Promise((resolve, reject) => {

@@ -94,6 +94,8 @@ export interface Episode extends Media {
     showName?: string;
     /** i.e. 'Season 1' or 'OVAs' */
     collection?: string;
+    /** The --download-archive filename associated with this episode */
+    archive?: string;
 }
 
 export interface SelectOption {
