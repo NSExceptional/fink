@@ -60,7 +60,6 @@ export function Search(props: React.PropsWithChildren<SearchProps>) {
 
     return <Page title='Search the Catalog'>
         <Box>
-            {/* <Text>􀊫</Text> */}
             <UncontrolledTextInput
                 placeholder='my hero academia'
                 onSubmit={context.set.query}
