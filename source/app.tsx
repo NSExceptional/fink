@@ -124,6 +124,8 @@ function App() {
             } else {
                 setState({ show: undefined });
             }
+        } else {
+            setState({ query: undefined });
         }
     }
     
