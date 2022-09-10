@@ -113,11 +113,13 @@ export class FAClient {
         const url = this.urlForEpisode(episode)!;
         const exe = this.ytdlPath;
         const args = [...this.ytdlArgs, url];
+        // Convert 'SX EY' into 'S0XE0Y'
+        const prefix = episode.shortCode.replace(/(S|E)(\d)/g, '$10$2').replace(' ', '');
         
         // Add output directory if specified
         if (episode.preferredDownloadPath) {
             args.push('-o');
-            args.push(`${episode.preferredDownloadPath}/%(title)s.%(ext)s`);
+            args.push(`${episode.preferredDownloadPath}/${prefix} %(title)s.%(ext)s`);
         }
         
         return new Promise((resolve, reject) => {
