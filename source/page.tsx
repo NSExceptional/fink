@@ -6,12 +6,13 @@
 //  Copyright © 2021 Tanner Bennett. All rights reserved.
 //
 
-import React, { ReactNode, useContext } from 'react';
+import React, { useContext } from 'react';
 import { Box, Text } from 'ink';
 import useStdoutDimensions from 'ink-use-stdout-dimensions';
 import { AppContext } from './app';
 import Divider from 'ink-divider';
 import { DownloadManager } from './dl-manager.js';
+import { UL } from './list.js';
 
 interface PageProps {
     title: string;
@@ -36,7 +37,7 @@ export function Page(props: React.PropsWithChildren<PageProps>) {
             </Box>
         </Box>
         <Divider width={w - 4} padding={0} />
-        <Text>{context.state.status}</Text>
+        <UL items={context.state.status!} />
         <Text>{DownloadManager.shared.currentDirectory}  | ^D change directory</Text>
     </Box>;
 }

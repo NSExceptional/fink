@@ -10,7 +10,7 @@ import { FAClient } from './api/client';
 import { Episode } from './api/model';
 import * as fs from 'fs';
 
-type StatusUpdater = (status: string) => void;
+type StatusUpdater = (status: string[]) => void;
 type StatusUpdaterFuture = () => StatusUpdater;
 
 export class DownloadManager {
@@ -36,7 +36,7 @@ export class DownloadManager {
         return [...this.downloads.slice(0, idx), ...this.downloads.slice(idx + 1)]
     }
     
-    private get status(): string {
+    private get status(): string[] {
         const N = this.downloads.length;
         if (N) {
             const prefix = `Downloading ${N} episode(s)`;
@@ -49,13 +49,13 @@ export class DownloadManager {
                     return `${e.name}: ${e.error}`;
                 }
                 
-                return `${e.name}: started...`;
-            }).join(', ');
+                return `${e.name}: pending`;
+            });
             
-            return `${prefix}\n${suffixes}`;
+            return [prefix, ...suffixes];
         }
         
-        return `No active downloads`;
+        return ['No active downloads'];
     }
     
     private addDownloadCallbackFuture: StatusUpdaterFuture = () => {

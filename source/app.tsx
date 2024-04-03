@@ -6,20 +6,19 @@
 //  Copyright © 2021 Tanner Bennett. All rights reserved.
 //
 
-import React, { useEffect, useState } from 'react';
-import { useInput, Text } from 'ink';
+import React, { useState } from 'react';
+import { useInput } from 'ink';
 import { Search } from './search';
-import { BaseSeason, Episode, Season, Show } from './api/model';
+import { Episode, Season, Show } from './api/model';
 import { ShowPage } from './show';
 import { SeasonPage } from './season';
 import { Setter, VoidSetter } from './api/types';
 import { DownloadManager } from './dl-manager';
-import { FAClient } from './api/client.js';
 import { CWDChanger } from './cd.js';
 
 interface AppState {
     /** A message to be shown at the bottom of every page */
-    status?: string;
+    status?: string[];
     /** The current search string */
     query?: string;
     /** The currently selected show */
@@ -45,7 +44,7 @@ interface IAppContext {
     }
 }
 
-const EmptyAppState: AppState = { status: 'No downloads', cd: false, cwd: '' };
+const EmptyAppState: AppState = { status: ['No downloads'], cd: false, cwd: '' };
 
 export const AppContext = React.createContext<IAppContext>({
     state: EmptyAppState,
