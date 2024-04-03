@@ -13,7 +13,6 @@ import { Box, Text } from 'ink';
 import SelectInput from 'ink-select-input';
 import { Select, Show } from './api/model';
 import { FAClient } from './api/client';
-import { Setter } from './api/types';
 import { AppContext } from './app';
 
 interface ResultsTableProps {
@@ -48,21 +47,29 @@ interface SearchProps {
 
 export function Search(props: React.PropsWithChildren<SearchProps>) {
     const context = useContext(AppContext);
-    const query = context.state.query ?? ''
-    const [results, setResults] = useState<Show[]>([]);
+    const query = context.state.query ?? '';
+    const [results, setResults] = useState<Show[] | undefined>(undefined);
     const [loading, setLoading] = useState(false);
     
-    if (query.length && !loading) {
+    // If we searched, and there are no results, and we're NOT loading them...
+    if (query.length && results == undefined && !loading) {
         setLoading(true);
         const shows = FAClient.shared.searchShows(query);
-        shows.then(setResults);
+        shows.then(setResults).finally(() => {
+            setLoading(false);
+        });
     }
+    
+    const searchHandler = (query: string) => {
+        context.set.query(query);
+        setResults(undefined); // Triggers load of new results
+    };
 
     return <Page title='Search the Catalog'>
         <Box>
             <UncontrolledTextInput
                 placeholder='my hero academia'
-                onSubmit={context.set.query}
+                onSubmit={searchHandler}
                 initialValue={context.state.query ?? ''} 
                 // 1. onChange doesn't exist here
                 // 2. Setting query would break my search logic above
@@ -70,6 +77,6 @@ export function Search(props: React.PropsWithChildren<SearchProps>) {
             />
         </Box>
         <Space />
-        <Results items={results} loading={loading} />
+        <Results items={results ?? []} loading={loading} />
     </Page>;
 }
