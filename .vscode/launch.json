@@ -9,11 +9,13 @@
             "request": "launch",
             "name": "Launch Program",
             "skipFiles": [
-                "<node_internals>/**"
+                "${workspaceFolder}/<node_internals>/**",
+                "${workspaceFolder}/node_modules/**",
+                "**/internal/**",
             ],
             "envFile": "${workspaceFolder}/.env",
             "program": "${workspaceFolder}/dist/cli.js",
-            "args": ["${config:FNK_USER}", "${config:FNK_PASS}", "-f", "-s", "D:\\"],
+            "args": ["${config:FNK_USER}", "${config:FNK_PASS}", "-f", "-s", "M:\\"],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}"
         }
