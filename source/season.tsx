@@ -22,26 +22,21 @@ export function SeasonPage(props: React.PropsWithChildren<{}>) {
     const [episodes, setEpisodes] = useState<Episode[]|undefined>(undefined);
     const [loading, setLoading] = useState(false);
     
-    const showName = context.state.show!.name;
-    const seasonName = context.state.season!.name;
+    const showName = context.state.show!.title;
+    const seasonName = context.state.season!.title;
     const numEpisodes = episodes?.length ?? 0;
     
     const title = `${showName} / ${seasonName} / ${numEpisodes} episode(s)`;
     
     function episodeFor(item: SelectOption): Episode | undefined {
         if (item.value == '*') return undefined;
-        return episodes?.filter(e => e.slug == item.value)[0];
+        return episodes?.filter(e => e.slugTitle == item.value)[0];
     }
     
     function addDownloadMetadataToEpisode(e: Episode) {
         const show = context.state.show!;
         const season = context.state.season!;
-        
-        // Pull show's slug from context
-        e.showSlug = show.slug;
-        e.showName = show.name;
-        e.collection = season.name;
-        e.archive = `${show.slug}-${season.name}.txt`;
+        e.archive = `${show.slugTitle}-${season.title}.txt`;
     }
     
     function downloadAll() {

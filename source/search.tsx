@@ -25,7 +25,7 @@ function Results(props: ResultsTableProps) {
 
     if (props.items.length) {
         return <SelectInput limit={10} items={Select.shows(props.items)} onSelect={ (item) => {
-            const choice = props.items.filter(s => s.slug == item.value)[0];
+            const choice = props.items.filter(s => s.slugTitle == item.value)[0];
             context.set.show(choice!);
         }}/>;
     }
@@ -54,10 +54,16 @@ export function Search(props: React.PropsWithChildren<SearchProps>) {
     // If we searched, and there are no results, and we're NOT loading them...
     if (query.length && results == undefined && !loading) {
         setLoading(true);
-        const shows = FAClient.shared.searchShows(query);
-        shows.then(setResults).finally(() => {
-            setLoading(false);
-        });
+        FAClient.shared.searchShows(query)
+            .then(setResults)
+            .catch(error => {
+                console.error(error);
+                setResults([]);
+                setLoading(false);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     }
     
     const searchHandler = (query: string) => {

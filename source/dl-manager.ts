@@ -43,13 +43,13 @@ export class DownloadManager {
             const suffixes = this.downloads.map(e => {
                 const progress = e.progress;
                 if (progress) {
-                    return `${e.name}: ${progress.percent}% of ${progress.totalSize}  ${progress.currentSpeed ?? ''}`
+                    return `${e.title}: ${progress.percent}% of ${progress.totalSize}  ${progress.currentSpeed ?? ''}`
                 }
                 else if (e.error) {
-                    return `${e.name}: ${e.error}`;
+                    return `${e.title}: ${e.error}`;
                 }
                 
-                return `${e.name}: pending`;
+                return `${e.title}: pending`;
             });
             
             return [prefix, ...suffixes];
@@ -129,7 +129,7 @@ export class DownloadManager {
         
         // Do we want to create a folder first?
         if (this.createFolders) {
-            const path = `./${episode.showName!}/${episode.collection!}`;
+            const path = `./${episode.seriesTitle!}/${episode.seasonTitle!}`;
             // const fullPath = `${this.currentDirectory}/${path}`;
             fs.mkdirSync(path, { recursive: true });
             episode.preferredDownloadPath = path;
@@ -147,7 +147,7 @@ export class DownloadManager {
         }
         catch (e: any) {
             // Handle error
-            const msg = e.message.replace('\n', '   ');
+            const msg = e.message.replaceAll('\n', '   ');
             episode.error = msg;
             episode.downloading = false;
             

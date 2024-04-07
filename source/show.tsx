@@ -6,23 +6,49 @@
 //  Copyright © 2021 Tanner Bennett. All rights reserved.
 //
 
-import React, { useContext } from 'react';
+import React, { ReactNode, useContext, useState } from 'react';
 import { Page } from './page';
-import { Season, Select, Show } from './api/model';
+import { Episode, Season, Select, Show } from './api/model';
+import { Text } from 'ink';
 import SelectInput from 'ink-select-input';
 import { AppContext } from './app';
+import { FAClient } from './api/client.js';
+import { DownloadManager } from './dl-manager.js';
 
 export function ShowPage(props: React.PropsWithChildren<{}>) {
     const context = useContext(AppContext);
-    const show = context.state.show!;
+    const show: Show = context.state.show!;
+    const [seasons, setSeasons] = useState<Season[]|undefined>(undefined);
+    const [loading, setLoading] = useState(false);
     
-    return <Page title={show.name}>
-        <SelectInput limit={10} items={Select.seasons(show.seasons)} onSelect={(item) => {
-            const choice = show.seasons.filter(s => s.id.toString() == item.value)[0];
+    function content(): ReactNode {
+        // While loading seasons...
+        if (loading) {
+            return <Text>Loading...</Text>;
+        }
+        
+        // Seasons did not load
+        if (!seasons) {
+            return <Text>Error loading seasons</Text>
+        }
+        
+        const selectItems = Select.seasons(seasons);
+        return <SelectInput limit={10} items={Select.seasons(seasons)} onSelect={(item) => {
+            const choice = seasons.filter(s => s.id.toString() == item.value)[0];
             const season = choice! as Season;
-            season.show = show;
-            
             context.set.season(season);
         }}/>
+    }
+    
+    // Load seasons on first presentation
+    if (!seasons && !loading) {
+        setLoading(true);
+        FAClient.shared.listSeasons(show!)
+            .then(setSeasons)
+            .then(() => setLoading(false));
+    }
+    
+    return <Page title={show.title}>
+        {content()}
     </Page>;
 }

@@ -9,91 +9,90 @@
 import { Progress } from 'youtube-dl-wrap';
 
 export interface APIError {
-    status_message?: string;
+    message?: string;
 }
 
-interface Quality {
-    quality: string;
-    height: number;
+export interface APIResponse<T> {
+    data: [T];
+    meta: {};
+    total: number;
+}
+
+export interface APIAuthResponse {
+    accessToken: string;
+    expiresIn: number;
+    refreshToken: string;
+    tokenType: string;
+}
+
+interface SearchResultGroup<T> {
+    count: number;
+    items: T[];
+    type: "series" | "episode" | "music" | "top_results" | "movie_listing";
+}
+
+export interface ShowSearchResponse {
+    [key: number]: SearchResultGroup<Show>;
 }
 
 interface Thing {
-    id: number;
-    name: string;
+    id: string;
+    identifier: string;
+    title: string;
 }
 
 interface Slugged extends Thing {
-    slug: string;
-}
-
-interface Media extends Slugged {
-    type: 'tv' | 'season' | 'episode';
+    slugTitle: string;
 }
 
 interface Language extends Thing {
     languageCode: string;
 }
 
-interface Genre extends Slugged {
+export interface BaseShow extends Slugged {
     description: string;
+    audioLocale: Language;
+    audioLocales: Language[];
+    subtitleLocales: Language[];
 }
 
-export interface Show extends Media {
-    seasons: BaseSeason[];
-    qualities: Quality[];
+export interface Show extends BaseShow {
     episodeCount: number;
-    moviesCount: number;
-    specialsCount: number;
-    ovaCount: number;
-    
-    yearOfProduction: number;
-    tagline: string;
-    shortSynopsis: string;
-    longSynopsis: string;
-    spokenLanguages: Language[];
-    subtitleLanguages: Language[];
-    genres: Genre[];
+    seasonCount: number;
+    seriesLaunchYear: number;
 }
 
-export interface BaseSeason extends Media {
-    episodeCount: number;
+export interface BaseSeason extends Slugged {
+    numberOfEpisodes: number;
     order: number;
-    number: number;
+    seasonNumber: number;
 }
 
 /** Custom subtype, adds reference to show */
 export interface Season extends BaseSeason {
-    show: Slugged;
+    series: Slugged;
 }
 
-export interface Episode extends Media {
-    showId: number;
-    episodeNumber: string;
-    duration: number; // Seconds
-    durationInMinutes: number;
-    versions: string[]; // ie simulcast
-    releaseDate: number; // epoch
-    sequence: number;
-    synopsis: string;
-    mature: boolean;
-    qualities: Quality[];
-    downloadable: boolean;
-    shortCode: string;
-    isSubRequired: boolean;
-    // videoList: any[];
+export interface Episode extends Slugged {
+    seasonId: string;
+    seasonSlugTitle: string;
+    seasonTitle: string;
+    
+    seriesId: string;
+    seriesSlugTitle: string;
+    seriesTitle: string;
+    
+    streamsLink: string;
+    sequenceNumber: number;
+    uploadDate: string;
     
     // My additions
-    showSlug?: string;
     downloading?: boolean;
     progress?: Progress;
     error?: string;
     
     /** A relative path to download the episode to. */
     preferredDownloadPath?: string;
-    /** i.e. 'Dragon Ball Z' */
-    showName?: string;
-    /** i.e. 'Season 1' or 'OVAs' */
-    collection?: string;
     /** The --download-archive filename associated with this episode */
     archive?: string;
 }
@@ -107,21 +106,28 @@ export interface SelectOption {
 export class Select {
     static shows(shows: Show[]): SelectOption[] {
         return shows.map(s => {
-            return { label: s.name, value: s.slug }
+            return { label: s.title, value: s.slugTitle }
         });
     }
     
-    static seasons(seasons: BaseSeason[]): SelectOption[] {
+    static seasons(seasons: Season[]): SelectOption[] {
+        const shouldKeepSeasonNames = !seasons.some(s => s.title.includes("Season")) && seasons.length > 1;
         return seasons.map(s => {
-            return { label: s.name, value: s.id.toString() }
+            let title = shouldKeepSeasonNames ? s.title : s.title
+                .replace(s.series.title, '')
+                .trim();
+            if (!shouldKeepSeasonNames && title.length == 0) {
+                title = 'Season ' + s.seasonNumber;
+            }
+            return { label: title, value: s.id.toString() }
         });
     }
     
     static episodes(eps: Episode[]): SelectOption[] {
         return eps.map(s => {
             // Show a * in front of queued episodes
-            const name = s.downloading ? '*' + s.name : s.name;
-            return { label: name, value: s.slug }
+            const name = s.downloading ? '*' + s.title : s.title;
+            return { label: name, value: s.slugTitle }
         });
     }
 }

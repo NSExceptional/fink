@@ -6,18 +6,28 @@
 //  Copyright © 2021 Tanner Bennett. All rights reserved.
 //
 
-import { APIError, BaseSeason, Episode, Season, Show } from './model';
+import { APIAuthResponse, APIError, APIResponse, BaseSeason, Episode, Season, Show, ShowSearchResponse } from './model';
 import { fetch } from 'fetch-h2';
 import * as qs from 'querystring';
 import YoutubeDlWrap, { Progress } from 'youtube-dl-wrap';
 import * as os from 'node:os';
 import * as fs from 'fs';
 
-enum Endpoint {
-    search = "/v1/shows/search",
-    listShows = "",
-    listSeasons = "/v2/shows/", // Takes show slug
-    listEpisodes = "/v1/seasons/", // Takes season ID
+class Endpoint {
+    static readonly auth = "/auth/v1/token";
+    static readonly search = "/content/v2/discover/search";
+    
+    static showDetails(showID: string): string {
+        return `/content/v2/cms/series/${showID}`;
+    }
+    
+    static listSeasons(showID: string): string {
+        return `/content/v2/cms/series/${showID}/seasons`;
+    }
+    
+    static listEpisodes(seasonID: string): string {
+        return `/content/v2/cms/seasons/${seasonID}/episodes`;
+    }
 }
 
 export class FAClient {
@@ -26,12 +36,44 @@ export class FAClient {
     email: string | undefined = undefined;
     password: string | undefined = undefined;
     
-    baseURL = "https://title-api.prd.funimationsvc.com";
+    searchAuth: {
+        token: string,
+        expiration: number,
+    } | undefined = undefined;
+    
+    baseURL = "https://www.crunchyroll.com";
     defaultParams = {
-        region: 'US',
-        deviceType: 'web',
-        locale: 'en'
+        locale: "en-US",
+        preferred_audio_language: "en-US",
     };
+    
+    private get defaultHeaders() {
+        return {
+            authorization: `${this.authType} ${this.apiToken}`,
+            accept: "application/json, text/plain, */*",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+        };
+    }
+    
+    private get authExpired(): boolean {
+        return !this.searchAuth || this.searchAuth.expiration < Date.now();
+    }
+    
+    private get authType(): string {
+        if (this.authExpired) {
+            return "Basic";
+        }
+        
+        return "Bearer";
+    }
+    
+    private get apiToken(): string {
+        if (this.authExpired) {
+            return 'Y3Jfd2ViOg==';
+        }
+        
+        return this.searchAuth!.token;
+    }
     
     get ytdlArgs(): string[] {
         // Check if we have login args or not
@@ -40,9 +82,10 @@ export class FAClient {
             loginArgs = ['-u', this.email, '-p', this.password];
         }
         
+        // https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#crunchyrollbeta-crunchyroll
         return [...loginArgs,
-            // '--cookies', '~/Desktop/funimation_cookies.txt',
-            '--extractor-args', 'funimation:language=english',
+            '--extractor-args', 'crunchyrollbeta:format=download_hls',
+            '--write-sub', '--sub-lang', 'enUS',
             '--cookies-from-browser', 'chrome',
             '--no-check-certificate',
         ];
@@ -60,39 +103,112 @@ export class FAClient {
         return fs.existsSync(this.ytdlPath);
     }
     
-    get<T>(endpoint: string, urlParams: qs.ParsedUrlQueryInput = {}, key?: string): Promise<T> {
+    /** A method to recursively convert json keys from snake_case to camelCase */
+    private jsonKeysToCamelCase<T>(json: T): T {
+        if (json === null || typeof json !== 'object') return json;
+        
+        if (Array.isArray(json)) {
+            return json.map(e => this.jsonKeysToCamelCase(e)) as any as T;
+        }
+        
+        const camelCased: any = {};
+        for (const key in json) {
+            const value = json[key];
+            const camelKey = key.replace(/_([a-z])/g, g => g[1]!.toUpperCase());
+            camelCased[camelKey] = this.jsonKeysToCamelCase(value);
+        }
+        
+        return camelCased;
+    }
+    
+    get<T>(endpoint: string, urlParams: qs.ParsedUrlQueryInput = {}): Promise<[T]> {
         const params = { ...urlParams, ...this.defaultParams };
         const paramString = qs.stringify(params);
         
         return fetch(this.baseURL + `${endpoint}?${paramString}`, {
             method: 'GET',
+            headers: this.defaultHeaders,
         })
         .then(async response => {
             if (response.status >= 400) {
                 const json: APIError = await response.json();
                 const code = response.status.toString();
-                const reason = json.status_message ?? 'reason';
+                const reason = json.message ?? 'no error message from API';
                 throw new Error(`${code}: ${reason}`);
             }
             
-            const json = await response.json();
-            if (key) {
-                return json[key];
-            }
-            
-            return json;
+            const json: APIResponse<T> = await response.json();
+            return this.jsonKeysToCamelCase(json.data);
         });
     }
     
-    searchShows(query: string): Promise<Show[]> {
-        return this.get(Endpoint.search, { searchTerms: qs.escape(query) }, 'list');
+    post<T>(endpoint: string, formBody: qs.ParsedUrlQueryInput = {}, headers?: {}): Promise<T> {
+        const params = formBody;
+        const paramString = qs.stringify(params);
+        
+        return fetch(this.baseURL + endpoint, {
+            method: 'POST',
+            headers: { ...this.defaultHeaders, ...headers },
+            body: paramString
+        })
+        .then(async response => {
+            if (response.status >= 400) {
+                const json: APIError = await response.json();
+                const code = response.status.toString();
+                const reason = json.message ?? 'no error message from API';
+                throw new Error(`${code}: ${reason}`);
+            }
+            
+            return this.jsonKeysToCamelCase(await response.json());
+        });
+    }
+    
+    private async authenticateForSearch(): Promise<void> {
+        if (this.searchAuth) return;
+        
+        const body = {
+            grant_type: "client_id",
+        };
+        
+        const headers = {
+            "content-type": "application/x-www-form-urlencoded",
+        };
+        
+        const auth: APIAuthResponse = await this.post(Endpoint.auth, body, headers);
+        this.searchAuth = {
+            token: auth.accessToken,
+            expiration: Date.now() + (auth.expiresIn * 1000),
+        };
+        
+        // Clear out searchAuth after expiration
+        setTimeout(() => {
+            this.searchAuth = undefined;
+        }, auth.expiresIn * 1000);
+    }
+    
+    async searchShows(query: string): Promise<Show[]> {
+        if (!this.searchAuth) {
+            await this.authenticateForSearch();
+        }
+        
+        const results: ShowSearchResponse = await this.get(Endpoint.search, {
+            q: qs.escape(query),
+            n: 10,
+            type: "series",
+        });
+        
+        return results[0]?.items ?? [];
     }
     
     async listSeasons(show: Show): Promise<Season[]> {
-        const baseSeasons: BaseSeason[] = await this.get(Endpoint.listSeasons + show.slug, {}, 'seasons');
+        if (!this.searchAuth) {
+            await this.authenticateForSearch();
+        }
+        
+        const baseSeasons: BaseSeason[] = await this.get(Endpoint.listSeasons(show.id));
         // Add show
         const seasons = (baseSeasons as Season[]).map(s => {
-            s.show = show;
+            s.series = show;
             return s;
         });
         
@@ -100,12 +216,11 @@ export class FAClient {
     }
     
     async listEpisodes(season: Season): Promise<Episode[]> {
-        const episodes: Episode[] = await this.get(Endpoint.listEpisodes + season.id, {}, 'episodes');
-        // Add show slug
-        episodes.forEach(e => {
-            e.showSlug = season.show.slug;
-        });
+        if (!this.searchAuth) {
+            await this.authenticateForSearch();
+        }
         
+        const episodes: Episode[] = await this.get(Endpoint.listEpisodes(season.id));
         return episodes;
     }
     
@@ -113,8 +228,8 @@ export class FAClient {
         const url = this.urlForEpisode(episode)!;
         const exe = this.ytdlPath;
         const args = [...this.ytdlArgs, url];
-        // Convert 'SX EY' into 'S0XE0Y'
-        const prefix = episode.shortCode.replace(/(S|E)(\d)/g, '$10$2').replace(' ', '');
+        // Convert 'XXXXXXX|SX|EY' into 'S0XE0Y'
+        const prefix = episode.slugTitle.replace(/([\w\d]+)\|S(\d+)\|E(\d+)/, 'S$2E$3');
         
         // Add output directory if specified
         if (episode.preferredDownloadPath) {
@@ -133,7 +248,7 @@ export class FAClient {
     }
     
     urlForEpisode(episode: Episode|undefined): string | undefined {
-        if (!episode || !episode.showSlug) return undefined;
-        return `https://www.funimation.com/en/shows/${episode.showSlug}/${episode.slug}`;
+        if (!episode || !episode.seriesSlugTitle) return undefined;
+        return `https://www.crunchyroll.com/watch/${episode.seriesId}/${episode.slugTitle}`;
     }
 }
