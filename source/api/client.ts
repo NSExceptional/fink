@@ -37,13 +37,13 @@ export class CRClient {
     password: string | undefined = undefined;
     userAgent: string | undefined = undefined;
     
-    searchAuth: {
+    private searchAuth: {
         token: string,
         expiration: number,
     } | undefined = undefined;
     
-    baseURL = "https://www.crunchyroll.com";
-    defaultParams = {
+    private readonly baseURL = "https://www.crunchyroll.com";
+    private defaultParams = {
         locale: "en-US",
         preferred_audio_language: "en-US",
     };
