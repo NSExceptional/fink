@@ -1,5 +1,6 @@
-# fundl: A Command Line Funimation Video Downloader
+# fundl: A Command Line Crunchyroll Video Downloader
 
+Originally for Funimation; hence the name Fun[imation]D[own]L[oader]
 
 ## Install
 
@@ -13,5 +14,5 @@ $ npm install --global fundl
 ```
 $ fundl --help
 
-  usage: fundl <username|email> <password>
+  usage: fundl <username|email> <password> <chrome-user-agent> [options]
 ```

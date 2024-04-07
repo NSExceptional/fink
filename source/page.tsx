@@ -28,7 +28,7 @@ export function Page(props: React.PropsWithChildren<PageProps>) {
 
     return <Box width={w} height={h} paddingLeft={1} borderStyle='single' flexDirection='column'>
         <Box marginTop={-1} paddingBottom={1}>
-            <Text>Funimation Downloader</Text>
+            <Text>Crunchyroll Downloader</Text>
         </Box>
         <Box paddingBottom={1} flexGrow={1} flexDirection='column'>
             <Text>{props.title}</Text>
