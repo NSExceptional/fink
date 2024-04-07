@@ -86,7 +86,9 @@ export class CRClient {
         // https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#crunchyrollbeta-crunchyroll
         return [...loginArgs,
             '--extractor-args', 'crunchyrollbeta:format=download_hls',
-            '--write-sub', '--sub-lang', 'enUS',
+            '--format', 'bestvideo+bestaudio[language=en-US]',
+            // '--format', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+            '--write-subs', '--sub-lang', 'en-US',
             '--cookies-from-browser', 'chrome',
             '--no-check-certificate',
             '--user-agent', this.userAgent ?? 'nil'
@@ -221,6 +223,16 @@ export class CRClient {
         const episodes: Episode[] = await this.get(Endpoint.listEpisodes(season.id));
         // Add extra metadata to each episode
         episodes.forEach(e => e.seasonNumber = season.seasonNumber);
+        // Switch locale to en-US
+        episodes.forEach(e => {
+            const english = e.versions.find(v => v.audioLocale == 'en-US');
+            if (english) {
+                e.audioLocale = english.audioLocale;
+                e.identifier.replace(e.id, english.guid);
+                e.id = english.guid;
+            }
+        });
+
         return episodes;
     }
     
