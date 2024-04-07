@@ -87,6 +87,7 @@ export interface Episode extends Slugged {
     uploadDate: string;
     
     // My additions
+    seasonNumber: number;
     downloading?: boolean;
     progress?: Progress;
     error?: string;

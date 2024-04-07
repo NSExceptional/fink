@@ -207,13 +207,9 @@ export class CRClient {
             await this.authenticateForSearch();
         }
         
-        const baseSeasons: BaseSeason[] = await this.get(Endpoint.listSeasons(show.id));
-        // Add show
-        const seasons = (baseSeasons as Season[]).map(s => {
-            s.series = show;
-            return s;
-        });
-        
+        const seasons: Season[] = await this.get(Endpoint.listSeasons(show.id));
+        // Add extra metadata to each season
+        seasons.forEach(s => s.series = show);
         return seasons;
     }
     
@@ -223,6 +219,8 @@ export class CRClient {
         }
         
         const episodes: Episode[] = await this.get(Endpoint.listEpisodes(season.id));
+        // Add extra metadata to each episode
+        episodes.forEach(e => e.seasonNumber = season.seasonNumber);
         return episodes;
     }
     
