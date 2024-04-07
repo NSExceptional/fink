@@ -9,9 +9,7 @@
 import { CRClient } from './api/client';
 import { Episode } from './api/model';
 import * as fs from 'fs';
-
-type StatusUpdater = (status: string[]) => void;
-type StatusUpdaterFuture = () => StatusUpdater;
+import { StatusUpdater, StatusUpdaterFuture } from './status.js';
 
 export class DownloadManager {
     static shared = new DownloadManager();
