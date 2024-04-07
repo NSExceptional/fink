@@ -12,7 +12,7 @@ import { Episode, Season, Select, Show } from './api/model';
 import { Text } from 'ink';
 import SelectInput from 'ink-select-input';
 import { AppContext } from './app';
-import { FAClient } from './api/client.js';
+import { CRClient } from './api/client.js';
 import { DownloadManager } from './dl-manager.js';
 
 export function ShowPage(props: React.PropsWithChildren<{}>) {
@@ -43,7 +43,7 @@ export function ShowPage(props: React.PropsWithChildren<{}>) {
     // Load seasons on first presentation
     if (!seasons && !loading) {
         setLoading(true);
-        FAClient.shared.listSeasons(show!)
+        CRClient.shared.listSeasons(show!)
             .then(setSeasons)
             .then(() => setLoading(false));
     }

@@ -11,7 +11,7 @@ import { Page } from './page';
 import { Text, useInput } from 'ink';
 import { Episode, Select, SelectOption } from './api/model';
 import SelectInput from 'ink-select-input';
-import { FAClient } from './api/client';
+import { CRClient } from './api/client';
 import { AppContext } from './app';
 import { DownloadManager } from './dl-manager';
 import clipboard from 'clipboardy';
@@ -55,7 +55,7 @@ export function SeasonPage(props: React.PropsWithChildren<{}>) {
     
     useInput((input, key) => {
         if (input == 'l' && selectedEpisode) {
-            const url = FAClient.shared.urlForEpisode(selectedEpisode)!;
+            const url = CRClient.shared.urlForEpisode(selectedEpisode)!;
             clipboard.writeSync(url);
         }
     });
@@ -101,7 +101,7 @@ export function SeasonPage(props: React.PropsWithChildren<{}>) {
     // Load episodes on first presentation
     if (!episodes && !loading) {
         setLoading(true);
-        FAClient.shared.listEpisodes(context.state.season!)
+        CRClient.shared.listEpisodes(context.state.season!)
             .then(setEpisodes)
             .then(() => setLoading(false));
     }

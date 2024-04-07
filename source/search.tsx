@@ -12,7 +12,7 @@ import { UncontrolledTextInput } from 'ink-text-input';
 import { Box, Text } from 'ink';
 import SelectInput from 'ink-select-input';
 import { Select, Show } from './api/model';
-import { FAClient } from './api/client';
+import { CRClient } from './api/client';
 import { AppContext } from './app';
 
 interface ResultsTableProps {
@@ -54,7 +54,7 @@ export function Search(props: React.PropsWithChildren<SearchProps>) {
     // If we searched, and there are no results, and we're NOT loading them...
     if (query.length && results == undefined && !loading) {
         setLoading(true);
-        FAClient.shared.searchShows(query)
+        CRClient.shared.searchShows(query)
             .then(setResults)
             .catch(error => {
                 console.error(error);

@@ -6,7 +6,7 @@
 //  Copyright © 2021 Tanner Bennett. All rights reserved.
 //
 
-import { FAClient } from './api/client';
+import { CRClient } from './api/client';
 import { Episode } from './api/model';
 import * as fs from 'fs';
 
@@ -137,7 +137,7 @@ export class DownloadManager {
         
         try {
             // Start new download
-            await FAClient.shared.downloadEpisode(episode, (progress) => {
+            await CRClient.shared.downloadEpisode(episode, (progress) => {
                 // Update status
                 episode.progress = progress;
                 callback()(this.status);

@@ -30,8 +30,8 @@ class Endpoint {
     }
 }
 
-export class FAClient {
-    static shared = new FAClient();
+export class CRClient {
+    static shared = new CRClient();
     
     email: string | undefined = undefined;
     password: string | undefined = undefined;

@@ -12,7 +12,7 @@ import React from 'react';
 import { render, useApp } from 'ink';
 import meow from 'meow';
 import App from './app';
-import { FAClient } from './api/client';
+import { CRClient } from './api/client';
 import { DownloadManager } from './dl-manager.js';
 
 const cli = meow(`
@@ -38,14 +38,14 @@ if (cli.input.length < 2) {
 }
 
 // Ensure yt-dlp is installed
-if (!FAClient.shared.ytdlInstalled) {
-	console.log(`yt-dlp is not installed. Expected at:\n${FAClient.shared.ytdlPath}`);
+if (!CRClient.shared.ytdlInstalled) {
+	console.log(`yt-dlp is not installed. Expected at:\n${CRClient.shared.ytdlPath}`);
 	process.exit(1);
 }
 
 // Extract login args
-FAClient.shared.email = cli.input[0];
-FAClient.shared.password = cli.input[1];
+CRClient.shared.email = cli.input[0];
+CRClient.shared.password = cli.input[1];
 
 // Extract other flags
 DownloadManager.shared.createFolders = cli.flags.createFolders;
