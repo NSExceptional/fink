@@ -118,7 +118,7 @@ export class DownloadManager {
                 
                 // Update status
                 callback()(this.status);
-            }, 2000);
+            }, 4000);
             
             // Allow starting new downloads
             this.currentDownload!.inProgress = false
