@@ -221,6 +221,17 @@ export class CRClient {
         }
         
         const episodes: Episode[] = await this.get(Endpoint.listEpisodes(season.id));
+        // Sort episodes ascending
+        episodes.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+        
+        // Are the episodes numbered within the series or within the season?
+        const firstEpisode = episodes[0];
+        if (firstEpisode && firstEpisode.sequenceNumber > 1) {
+            // Offset all episode numbers so that they start at 1
+            const offset = firstEpisode.sequenceNumber - 1;
+            episodes.forEach(e => e.sequenceNumber -= offset);
+        }
+        
         // Add extra metadata to each episode
         episodes.forEach(e => e.seasonNumber = season.seasonNumber);
         // Switch locale to en-US
@@ -232,7 +243,7 @@ export class CRClient {
                 e.id = english.guid;
             }
         });
-
+        
         return episodes;
     }
     
@@ -240,8 +251,10 @@ export class CRClient {
         const url = this.urlForEpisode(episode)!;
         const exe = this.ytdlPath;
         const args = [...this.ytdlArgs, url];
-        // Convert 'XXXXXXX|SX|EY' into 'S0XE0Y'
-        const prefix = episode.identifier.replace(/([\w\d]+)\|S(\d+)\|E(\d+)/, 'S$2E$3');
+        // Prefix is constructed like S01E01 from episode.seasonNumber and episode.sequenceNumber
+        const sn = episode.seasonNumber.toString();
+        const en = episode.sequenceNumber.toString();
+        const prefix = `S${sn.padStart(2, '0')}E${en.padStart(2, '0')}`;
         
         // Add output directory if specified
         if (episode.preferredDownloadPath) {
