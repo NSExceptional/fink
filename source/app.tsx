@@ -37,6 +37,7 @@ interface IAppContext {
     addDownload: Setter<Episode>;
     downloadAll: Setter<Episode[]>;
     set: {
+        status: Setter<string[]>,
         cd: Setter<boolean>;
         query: Setter<string>;
         show: Setter<Show>;
@@ -50,7 +51,7 @@ export const AppContext = React.createContext<IAppContext>({
     state: EmptyAppState,
     addDownload: VoidSetter,
     downloadAll: VoidSetter,
-    set: { cd: VoidSetter, query: VoidSetter, show: VoidSetter, season: VoidSetter }
+    set: { status: VoidSetter, cd: VoidSetter, query: VoidSetter, show: VoidSetter, season: VoidSetter }
 });
 
 function App() {
@@ -70,6 +71,9 @@ function App() {
             dlmanager.downloadAll(episodes);
         },
         set: {
+            status: (status) => {
+                setState({ status: status });
+            },
             cd: (flag) => {
                 setState({ cd: flag })
             },
