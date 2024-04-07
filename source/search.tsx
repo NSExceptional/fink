@@ -57,7 +57,7 @@ export function Search(props: React.PropsWithChildren<SearchProps>) {
         CRClient.shared.searchShows(query)
             .then(setResults)
             .catch(error => {
-                console.error(error);
+                context.set.status(['Error searching:', error.message]);
                 setResults([]);
                 setLoading(false);
             })
