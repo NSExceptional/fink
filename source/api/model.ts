@@ -49,11 +49,30 @@ interface Language extends Thing {
     languageCode: string;
 }
 
+interface EpisodeVersion {
+    audioLocale: string;
+    guid: string;
+    original: boolean;
+    seasonGuid: string;
+}
+
 export interface BaseShow extends Slugged {
     description: string;
-    audioLocale: Language;
-    audioLocales: Language[];
-    subtitleLocales: Language[];
+    seriesMetadata: {
+        audioLocales: string[];
+        subtitleLocales: string[];
+        tenantCategories: string[];
+        episodeCount: number;
+        seasonCount: number;
+        seriesLaunchYear: number;
+        isSubbed: boolean;
+        isDubbed: boolean;
+        isMature: boolean;
+        isSimulcast: boolean;
+    }
+    // audioLocale: Language;
+    // audioLocales: Language[];
+    // subtitleLocales: Language[];
 }
 
 export interface Show extends BaseShow {
@@ -82,9 +101,13 @@ export interface Episode extends Slugged {
     seriesSlugTitle: string;
     seriesTitle: string;
     
-    streamsLink: string;
+    /** Usually the ordinal of the episode within the series, not the season */
     sequenceNumber: number;
+    streamsLink: string;
     uploadDate: string;
+    
+    audioLocale: string;
+    versions: EpisodeVersion[];
     
     // My additions
     seasonNumber: number;
@@ -92,7 +115,7 @@ export interface Episode extends Slugged {
     progress?: Progress;
     error?: string;
     
-    /** A relative path to download the episode to. */
+    /** A relative path to download the episode to */
     preferredDownloadPath?: string;
     /** The --download-archive filename associated with this episode */
     archive?: string;
