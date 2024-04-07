@@ -35,6 +35,7 @@ export class CRClient {
     
     email: string | undefined = undefined;
     password: string | undefined = undefined;
+    userAgent: string | undefined = undefined;
     
     searchAuth: {
         token: string,
@@ -51,7 +52,7 @@ export class CRClient {
         return {
             authorization: `${this.authType} ${this.apiToken}`,
             accept: "application/json, text/plain, */*",
-            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+            "user-agent": this.userAgent ?? "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
         };
     }
     
@@ -88,6 +89,7 @@ export class CRClient {
             '--write-sub', '--sub-lang', 'enUS',
             '--cookies-from-browser', 'chrome',
             '--no-check-certificate',
+            '--user-agent', this.userAgent ?? 'nil'
         ];
     }
     
@@ -229,7 +231,7 @@ export class CRClient {
         const exe = this.ytdlPath;
         const args = [...this.ytdlArgs, url];
         // Convert 'XXXXXXX|SX|EY' into 'S0XE0Y'
-        const prefix = episode.slugTitle.replace(/([\w\d]+)\|S(\d+)\|E(\d+)/, 'S$2E$3');
+        const prefix = episode.identifier.replace(/([\w\d]+)\|S(\d+)\|E(\d+)/, 'S$2E$3');
         
         // Add output directory if specified
         if (episode.preferredDownloadPath) {
@@ -249,6 +251,6 @@ export class CRClient {
     
     urlForEpisode(episode: Episode|undefined): string | undefined {
         if (!episode || !episode.seriesSlugTitle) return undefined;
-        return `https://www.crunchyroll.com/watch/${episode.seriesId}/${episode.slugTitle}`;
+        return `https://www.crunchyroll.com/watch/${episode.id}/${episode.slugTitle}`;
     }
 }

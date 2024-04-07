@@ -16,8 +16,8 @@ import { CRClient } from './api/client';
 import { DownloadManager } from './dl-manager.js';
 
 const cli = meow(`
-usage: fundl <username|email> <password>
-Log into Funimation in Google Chrome, too, for downloads to work.`, {
+usage: fundl <username|email> <password> <chrome-user-agent> [options]
+Log into Crunchyroll in Google Chrome, too, for downloads to work.`, {
 	flags: {
 		createFolders: {
 			type: 'boolean',
@@ -32,7 +32,7 @@ Log into Funimation in Google Chrome, too, for downloads to work.`, {
 });
 
 // Ensure arguments were supplied
-if (cli.input.length < 2) {
+if (cli.input.length < 3) {
 	console.log(cli.help);
 	process.exit(1);
 }
@@ -46,6 +46,7 @@ if (!CRClient.shared.ytdlInstalled) {
 // Extract login args
 CRClient.shared.email = cli.input[0];
 CRClient.shared.password = cli.input[1];
+CRClient.shared.userAgent = cli.input[2];
 
 // Extract other flags
 DownloadManager.shared.createFolders = cli.flags.createFolders;

@@ -15,7 +15,7 @@
             ],
             "envFile": "${workspaceFolder}/.env",
             "program": "${workspaceFolder}/dist/cli.js",
-            "args": ["${config:FNK_USER}", "${config:FNK_PASS}", "-f", "-s", "M:\\"],
+            "args": ["${config:FNK_USER}", "${config:FNK_PASS}", "${config:FNK_UA}", "-f", "-s", "M:\\"],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}"
         }
