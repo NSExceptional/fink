@@ -33,18 +33,8 @@ export function SeasonPage(props: React.PropsWithChildren<{}>) {
         return episodes?.filter(e => e.slugTitle == item.value)[0];
     }
     
-    function addDownloadMetadataToEpisode(e: Episode) {
-        const show = context.state.show!;
-        const season = context.state.season!;
-        e.archive = `${show.slugTitle}-${season.title}.txt`
-            // Remove disallowed characters
-            .replace(/[\\?%*:|"<>]/g, '');
-    }
-    
     function downloadAll() {
         if (!episodes) return;
-        
-        episodes.forEach(addDownloadMetadataToEpisode);
         context.downloadAll(episodes);
     }
     
@@ -90,7 +80,6 @@ export function SeasonPage(props: React.PropsWithChildren<{}>) {
                 // Enqueue a new download
                 const choice = episodeFor(item);
                 if (choice && !choice.downloading) {
-                    addDownloadMetadataToEpisode(choice);
                     context.addDownload(choice);
                 }
             }

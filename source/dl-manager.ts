@@ -92,6 +92,17 @@ export class DownloadManager {
         return false;
     }
     
+    private addDownloadMetadataToEpisode(episode: Episode) {
+        if (episode.archive) return;
+        
+        const show = episode.seriesSlugTitle;
+        const season = episode.seasonSlugTitle;
+        const archive = this.useSeasonFolders ? `${show}-${season}` : show;
+        episode.archive = `${archive}.txt`
+            // Remove disallowed characters
+            .replace(/[\\?%*:|"<>]/g, '');
+    }
+    
     private async downloadNextEpisode(callback: StatusUpdaterFuture) {
         // Are we already downloading something?
         if (this.currentDownload?.inProgress) {
@@ -168,6 +179,7 @@ export class DownloadManager {
     }
     
     async addDownload(episode: Episode) {
+        this.addDownloadMetadataToEpisode(episode);
         const inQueue = this.episodeIsDownloading(episode);
         const didFail = this.episodeDownloadFailed(episode);
         
