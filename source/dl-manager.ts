@@ -18,7 +18,7 @@ export class DownloadManager {
     private currentDownload: { inProgress: boolean, episode: Episode } | undefined;
     
     /** Whether or not to create folders like 'Show/Season 1/' to download into */
-    createFolders = false;
+    useSeasonFolders = false;
     
     // Technically, there is a race condition here... currentDownload is excluded
     // from the queue, but it is not removed from the queue until 2 seconds after
@@ -125,15 +125,17 @@ export class DownloadManager {
             this.downloadNextEpisode(callback);
         };
         
-        // Do we want to create a folder first?
-        if (this.createFolders) {
-            const path = `./${episode.seriesTitle!}/Season ${episode.seasonNumber!}`
-                // Remove disallowed characters
-                .replace(/[\\?%*:|"<>]/g, '');
+        // Create folder to store episode(s)
+        const path = (this.useSeasonFolders ?
+            `./${episode.seriesTitle!}/Season ${episode.seasonNumber!}`
+            :
+            `./${episode.seriesTitle!}`
+        )
+        // Remove disallowed characters
+        .replace(/[\\?%*:|"<>]/g, '');
 
-            fs.mkdirSync(path, { recursive: true });
-            episode.preferredDownloadPath = path;
-        }
+        fs.mkdirSync(path, { recursive: true });
+        episode.preferredDownloadPath = path;
         
         try {
             // Start new download

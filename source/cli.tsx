@@ -19,7 +19,7 @@ const cli = meow(`
 usage: fundl <username|email> <password> <chrome-user-agent> [options]
 Log into Crunchyroll in Google Chrome, too, for downloads to work.`, {
 	flags: {
-		createFolders: {
+		useSeasonFolders: {
 			type: 'boolean',
 			alias: 'f',
 			default: false,
@@ -49,7 +49,7 @@ CRClient.shared.password = cli.input[1];
 CRClient.shared.userAgent = cli.input[2];
 
 // Extract other flags
-DownloadManager.shared.createFolders = cli.flags.createFolders;
+DownloadManager.shared.useSeasonFolders = cli.flags.useSeasonFolders;
 if (cli.flags.startIn) {
 	DownloadManager.shared.changeDirectory(cli.flags.startIn);
 }
