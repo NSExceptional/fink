@@ -147,13 +147,20 @@ export class DownloadManager {
         }
         catch (e: any) {
             // Handle error
-            const msg = e.message.replaceAll('\n', '   ');
-            episode.error = msg;
+            if (e.message.includes('Traceback')) {
+                // Extract the third to last line
+                const lines = e.message.split('\n');
+                episode.error = lines[lines.length - 3];
+            }
+            else {
+                episode.error = e.message.replaceAll('\n', '   ');
+            }
+            
             episode.downloading = false;
             
             // Update status
             callback()(this.status);
-            
+            // Start next download
             unqueueAndStartNext();
         }
     }
