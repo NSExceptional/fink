@@ -89,6 +89,7 @@ export class CRClient {
             '--format', 'bestvideo+bestaudio[language=en-US]',
             // '--format', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
             '--write-subs', '--sub-lang', 'en-US',
+            '--sub-format', 'srt',
             '--cookies-from-browser', 'chrome',
             '--no-check-certificate',
             '--user-agent', this.userAgent ?? 'nil'
