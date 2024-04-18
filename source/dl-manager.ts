@@ -127,8 +127,10 @@ export class DownloadManager {
         
         // Do we want to create a folder first?
         if (this.createFolders) {
-            const path = `./${episode.seriesTitle!}/Season ${episode.seasonNumber!}`;
-            // const fullPath = `${this.currentDirectory}/${path}`;
+            const path = `./${episode.seriesTitle!}/Season ${episode.seasonNumber!}`
+                // Remove disallowed characters
+                .replace(/[\\?%*:|"<>]/g, '');
+
             fs.mkdirSync(path, { recursive: true });
             episode.preferredDownloadPath = path;
         }

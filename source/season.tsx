@@ -36,7 +36,9 @@ export function SeasonPage(props: React.PropsWithChildren<{}>) {
     function addDownloadMetadataToEpisode(e: Episode) {
         const show = context.state.show!;
         const season = context.state.season!;
-        e.archive = `${show.slugTitle}-${season.title}.txt`;
+        e.archive = `${show.slugTitle}-${season.title}.txt`
+            // Remove disallowed characters
+            .replace(/[\\?%*:|"<>]/g, '');
     }
     
     function downloadAll() {
