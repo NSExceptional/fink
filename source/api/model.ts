@@ -120,7 +120,7 @@ export interface Episode extends Slugged {
     
     // DownloadManager metadata //
     
-    /** A relative path to download the episode to */
+    /** A (relative) folder to download the episode into */
     preferredDownloadPath?: string;
     /** The `--download-archive` filename associated with this episode */
     archive?: string;
