@@ -110,14 +110,19 @@ export interface Episode extends Slugged {
     versions: EpisodeVersion[];
     
     // My additions
-    seasonNumber: number;
+    seasonNumber?: number;
     downloading?: boolean;
     progress?: Progress;
     error?: string;
     
+    /** i.e. S01E24 */
+    seasonEpisodeID?: string;
+    
+    // DownloadManager metadata //
+    
     /** A relative path to download the episode to */
     preferredDownloadPath?: string;
-    /** The --download-archive filename associated with this episode */
+    /** The `--download-archive` filename associated with this episode */
     archive?: string;
 }
 

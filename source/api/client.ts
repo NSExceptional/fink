@@ -234,7 +234,15 @@ export class CRClient {
         }
         
         // Add extra metadata to each episode
-        episodes.forEach(e => e.seasonNumber = season.seasonNumber);
+        episodes.forEach(e => {
+            e.seasonNumber = season.seasonNumber;
+            
+            // seasonEpisodeID is constructed like S01E01 from episode.seasonNumber and episode.sequenceNumber
+            const sn = e.seasonNumber.toString();
+            const en = e.sequenceNumber.toString();
+            e.seasonEpisodeID = `S${sn.padStart(2, '0')}E${en.padStart(2, '0')}`;
+        });
+        
         // Switch locale to en-US
         episodes.forEach(e => {
             const english = e.versions.find(v => v.audioLocale == 'en-US');
@@ -252,17 +260,20 @@ export class CRClient {
         const url = this.urlForEpisode(episode)!;
         const exe = this.ytdlPath;
         const args = [...this.ytdlArgs, url];
-        // Prefix is constructed like S01E01 from episode.seasonNumber and episode.sequenceNumber
-        const sn = episode.seasonNumber.toString();
-        const en = episode.sequenceNumber.toString();
-        const prefix = `S${sn.padStart(2, '0')}E${en.padStart(2, '0')}`;
+        
+        if (!episode.seasonEpisodeID) {
+            throw new Error("Episode missing seasonEpisodeID");
+        }
+        if (!episode.archive) {
+            throw new Error("Episode missing archive file");
+        }
         
         // Add output directory if specified
         if (episode.preferredDownloadPath) {
             args.push('-o');
-            args.push(`${episode.preferredDownloadPath}/${prefix} %(title)s.%(ext)s`);
+            args.push(`${episode.preferredDownloadPath}/${episode.seasonEpisodeID} %(title)s.%(ext)s`);
             args.push('--download-archive');
-            args.push(`${episode.preferredDownloadPath}/${episode.archive!}`);
+            args.push(`${episode.preferredDownloadPath}/${episode.archive}`);
         }
         
         return new Promise((resolve, reject) => {

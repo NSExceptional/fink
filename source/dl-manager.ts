@@ -93,14 +93,26 @@ export class DownloadManager {
     }
     
     private addDownloadMetadataToEpisode(episode: Episode) {
-        if (episode.archive) return;
+        // The file that tracks which episodes have been downloaded
+        if (!episode.archive) {
+            const show = episode.seriesSlugTitle;
+            const season = episode.seasonSlugTitle;
+            const archive = this.useSeasonFolders ? `${show}-${season}` : show;
+            episode.archive = `${archive}.txt`
+                // Remove disallowed characters
+                .replace(/[\\?%*:|"<>]/g, '');
+        }
         
-        const show = episode.seriesSlugTitle;
-        const season = episode.seasonSlugTitle;
-        const archive = this.useSeasonFolders ? `${show}-${season}` : show;
-        episode.archive = `${archive}.txt`
+        // Folder to store episode(s) in
+        if (!episode.preferredDownloadPath) {
+            const path = (this.useSeasonFolders ?
+                `./${episode.seriesTitle!}/Season ${episode.seasonNumber!}`
+                :
+                `./${episode.seriesTitle!}`
+            )
             // Remove disallowed characters
             .replace(/[\\?%*:|"<>]/g, '');
+        }
     }
     
     private async downloadNextEpisode(callback: StatusUpdaterFuture) {
@@ -135,18 +147,9 @@ export class DownloadManager {
             // Download next episode from queue
             this.downloadNextEpisode(callback);
         };
-        
-        // Create folder to store episode(s)
-        const path = (this.useSeasonFolders ?
-            `./${episode.seriesTitle!}/Season ${episode.seasonNumber!}`
-            :
-            `./${episode.seriesTitle!}`
-        )
-        // Remove disallowed characters
-        .replace(/[\\?%*:|"<>]/g, '');
 
-        fs.mkdirSync(path, { recursive: true });
-        episode.preferredDownloadPath = path;
+        // Create download folder
+        fs.mkdirSync(episode.preferredDownloadPath!, { recursive: true });
         
         try {
             // Start new download
