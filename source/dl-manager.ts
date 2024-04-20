@@ -115,7 +115,7 @@ export class DownloadManager {
         }
     }
     
-    private async downloadNextEpisode(callback: StatusUpdaterFuture) {
+    private async downloadNextEpisode(progressCallback: StatusUpdaterFuture) {
         // Are we already downloading something?
         if (this.currentDownload?.inProgress) {
             return;
@@ -138,14 +138,14 @@ export class DownloadManager {
                 this.downloads.splice(idx, 1);
                 
                 // Update status
-                callback()(this.status);
+                progressCallback()(this.status);
             }, 4000);
             
             // Allow starting new downloads
             this.currentDownload!.inProgress = false
             
             // Download next episode from queue
-            this.downloadNextEpisode(callback);
+            this.downloadNextEpisode(progressCallback);
         };
 
         // Create download folder
@@ -156,7 +156,7 @@ export class DownloadManager {
             await CRClient.shared.downloadEpisode(episode, (progress) => {
                 // Update status
                 episode.progress = progress;
-                callback()(this.status);
+                progressCallback()(this.status);
             });
             
             unqueueAndStartNext();
@@ -175,7 +175,7 @@ export class DownloadManager {
             episode.downloading = false;
             
             // Update status
-            callback()(this.status);
+            progressCallback()(this.status);
             // Start next download
             unqueueAndStartNext();
         }
