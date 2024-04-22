@@ -216,4 +216,47 @@ export class DownloadManager {
         // Start downloading, if not already
         this.downloadNextEpisode(this.downloadAllCallbackFuture);
     }
+    
+    /** All episodes are expected to reside in the same folder */
+    updateFilenameFor(episodes: Episode[]): number {
+        if (!episodes.length) return 0;
+        
+        episodes.forEach(this.addDownloadMetadataToEpisode.bind(this));
+        
+        // The number of files renamed
+        let renamed = 0;
+        
+        // List all files in the folder where episodes are expected to be
+        const preferredDownloadPath = episodes[0]!.preferredDownloadPath!;
+        const files = fs.readdirSync(preferredDownloadPath);
+        
+        for (const e of episodes) {
+            const potentialFilenames = [
+                // ! will not match anything if seasonEpisodeID is missing
+                e.seasonEpisodeID ?? '!',
+                e.fsSafeTitle ?? '!',
+            ];
+            
+            // Check if any file exists with the any of the above names, ignoring the extension
+            for (const file of files) {
+                // Safely split the filename into "name" and "extension", since the
+                // name might include a period
+                const parts = file.split('.');
+                const name = parts.slice(0, -1).join('.');
+                const ext = parts[parts.length - 1];
+                
+                // If the file matches any of the potential filenames, rename it
+                if (name && potentialFilenames.includes(name)) {
+                    const oldPath = `${preferredDownloadPath}/${file}`;
+                    const newPath = `${preferredDownloadPath}/${e.seasonEpisodeID} ${e.fsSafeTitle}.${ext}`;
+                    fs.renameSync(oldPath, newPath);
+                    renamed++;
+                    // Next episode
+                    break;
+                }
+            }
+        }
+        
+        return renamed;
+    }
 }
