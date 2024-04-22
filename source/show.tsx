@@ -8,8 +8,8 @@
 
 import React, { ReactNode, useContext, useState } from 'react';
 import { Page } from './page';
-import { Episode, Season, Select, Show } from './api/model';
-import { Text } from 'ink';
+import { Episode, Season, Select, SelectOption, Show } from './api/model';
+import { Text, useInput } from 'ink';
 import SelectInput from 'ink-select-input';
 import { AppContext } from './app';
 import { CRClient } from './api/client.js';
@@ -18,8 +18,22 @@ import { DownloadManager } from './dl-manager.js';
 export function ShowPage(props: React.PropsWithChildren<{}>) {
     const context = useContext(AppContext);
     const show: Show = context.state.show!;
+    const [selectedSeason, setSelectedSeason] = useState<Season|undefined>(undefined);
     const [seasons, setSeasons] = useState<Season[]|undefined>(undefined);
     const [loading, setLoading] = useState(false);
+    
+    // Keyboard shortcuts
+    useInput((input, key) => {
+        // Debugging
+        if (input == 'i') {
+            const season = selectedSeason;
+            console.log(season);
+        }
+    });
+    
+    function seasonFor(item: SelectOption): Season | undefined {
+        return seasons?.filter(s => s.id == item.value)[0];
+    }
     
     function content(): ReactNode {
         // While loading seasons...
@@ -33,10 +47,12 @@ export function ShowPage(props: React.PropsWithChildren<{}>) {
         }
         
         const selectItems = Select.seasons(seasons);
-        return <SelectInput limit={10} items={Select.seasons(seasons)} onSelect={(item) => {
-            const choice = seasons.filter(s => s.id.toString() == item.value)[0];
-            const season = choice! as Season;
-            context.set.season(season);
+        return <SelectInput limit={10} items={selectItems} onSelect={(item) => {
+            const choice = seasonFor(item)!;
+            context.set.season(choice);
+        }}
+        onHighlight={(item) => {
+            setSelectedSeason(seasonFor(item));
         }}/>
     }
     
@@ -44,8 +60,11 @@ export function ShowPage(props: React.PropsWithChildren<{}>) {
     if (!seasons && !loading) {
         setLoading(true);
         CRClient.shared.listSeasons(show!)
-            .then(setSeasons)
-            .then(() => setLoading(false));
+            .then((seasons) => {
+                setSeasons(seasons);
+                setSelectedSeason(seasons[0]);
+                setLoading(false);
+            });
     }
     
     return <Page title={show.title}>

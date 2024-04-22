@@ -48,6 +48,12 @@ export function SeasonPage(props: React.PropsWithChildren<{}>) {
     
     // Keyboard shortcuts
     useInput((input, key) => {
+        // Debugging
+        if (input == 'i') {
+            const episode = selectedEpisode;
+            console.log(episode);
+        }
+        
         // Copy URL to clipboard
         if (input == 'l' && selectedEpisode) {
             clipboard.writeSync(selectedEpisode.videoURL!);
