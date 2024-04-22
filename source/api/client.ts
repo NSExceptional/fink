@@ -210,7 +210,10 @@ export class CRClient {
         
         const seasons: Season[] = await this.get(Endpoint.listSeasons(show.id));
         // Add extra metadata to each season
-        seasons.forEach(s => s.series = show);
+        seasons.forEach(s => {
+            s.series = show;
+            s.fsSafeTitle = s.title.replace(/[\\?%*:|"<>]/g, '');
+        });
         return seasons;
     }
     
@@ -231,16 +234,6 @@ export class CRClient {
             episodes.forEach(e => e.sequenceNumber -= offset);
         }
         
-        // Add extra metadata to each episode
-        episodes.forEach(e => {
-            e.seasonNumber = season.seasonNumber;
-            
-            // seasonEpisodeID is constructed like S01E01 from episode.seasonNumber and episode.sequenceNumber
-            const sn = e.seasonNumber.toString();
-            const en = e.sequenceNumber.toString();
-            e.seasonEpisodeID = `S${sn.padStart(2, '0')}E${en.padStart(2, '0')}`;
-        });
-        
         // Switch locale to en-US
         episodes.forEach(e => {
             const english = e.versions.find(v => v.audioLocale == 'en-US');
@@ -251,25 +244,43 @@ export class CRClient {
             }
         });
         
+        // Add extra metadata to each episode
+        episodes.forEach(e => {
+            e.seasonNumber = season.seasonNumber;
+            e.fsSafeTitle = e.title.replace(/[\\?%*:|"<>]/g, '');
+            e.fsSafeSeasonTitle = e.seasonTitle.replace(/[\\?%*:|"<>]/g, '');
+            e.fsSafeSeriesTitle = e.seriesTitle.replace(/[\\?%*:|"<>]/g, '');
+            
+            // seasonEpisodeID is constructed like S01E01 from episode.seasonNumber and episode.sequenceNumber
+            const sn = e.seasonNumber.toString();
+            const en = e.sequenceNumber.toString();
+            e.seasonEpisodeID = `S${sn.padStart(2, '0')}E${en.padStart(2, '0')}`;
+            
+            e.videoURL = `https://www.crunchyroll.com/watch/${e.id}/${e.slugTitle}`;
+            e.ytdlFilename = `${e.seasonEpisodeID} ${e.fsSafeTitle}.%(ext)s`;
+        });
+        
         return episodes;
     }
     
     downloadEpisode(episode: Episode, progress: (progress: Progress) => void): Promise<void> {
-        const url = this.urlForEpisode(episode)!;
-        const exe = this.ytdlPath;
-        const args = [...this.ytdlArgs, url];
+        const requiredKeys: (keyof Episode)[] = [
+            'videoURL', 'ytdlFilename', 'seasonEpisodeID', 'archive', 'fsSafeTitle'
+        ];
+        for (const key of requiredKeys) {
+            if (!episode[key]) {
+                throw new Error(`Episode missing ${key}`);
+            }
+        }
         
-        if (!episode.seasonEpisodeID) {
-            throw new Error("Episode missing seasonEpisodeID");
-        }
-        if (!episode.archive) {
-            throw new Error("Episode missing archive file");
-        }
+        const exe = this.ytdlPath;
+        const args = [...this.ytdlArgs, episode.videoURL!];
         
         // Add output directory if specified
         if (episode.preferredDownloadPath) {
             args.push('-o');
-            args.push(`${episode.preferredDownloadPath}/${episode.seasonEpisodeID} %(title)s.%(ext)s`);
+            // Used to use %(title) here, but it puts the whole show title in it, bleh
+            args.push(`${episode.preferredDownloadPath}/${episode.ytdlFilename}`);
             args.push('--download-archive');
             args.push(`${episode.preferredDownloadPath}/${episode.archive}`);
         }
@@ -280,10 +291,5 @@ export class CRClient {
                 .on('close', resolve)
                 .on('error', reject);
         });
-    }
-    
-    urlForEpisode(episode: Episode|undefined): string | undefined {
-        if (!episode || !episode.seriesSlugTitle) return undefined;
-        return `https://www.crunchyroll.com/watch/${episode.id}/${episode.slugTitle}`;
     }
 }

@@ -90,6 +90,7 @@ export interface BaseSeason extends Slugged {
 /** Custom subtype, adds reference to show */
 export interface Season extends BaseSeason {
     series: Slugged;
+    fsSafeTitle?: string;
 }
 
 export interface Episode extends Slugged {
@@ -111,6 +112,11 @@ export interface Episode extends Slugged {
     
     // My additions
     seasonNumber?: number;
+    fsSafeTitle?: string;
+    fsSafeSeasonTitle?: string;
+    fsSafeSeriesTitle?: string;
+    videoURL?: string
+    ytdlFilename?: string;
     downloading?: boolean;
     progress?: Progress;
     error?: string;

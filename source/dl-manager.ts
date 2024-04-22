@@ -105,13 +105,11 @@ export class DownloadManager {
         
         // Folder to store episode(s) in
         if (!episode.preferredDownloadPath) {
-            const path = (this.useSeasonFolders ?
-                `./${episode.seriesTitle!}/Season ${episode.seasonNumber!}`
+            episode.preferredDownloadPath = (this.useSeasonFolders ?
+                `./${episode.fsSafeSeriesTitle!}/Season ${episode.seasonNumber!}`
                 :
-                `./${episode.seriesTitle!}`
-            )
-            // Remove disallowed characters
-            .replace(/[\\?%*:|"<>]/g, '');
+                `./${episode.fsSafeSeriesTitle!}`
+            );
         }
     }
     

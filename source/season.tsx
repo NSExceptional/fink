@@ -92,8 +92,7 @@ export function SeasonPage(props: React.PropsWithChildren<{}>) {
     useInput((input, key) => {
         // Copy URL to clipboard
         if (input == 'l' && selectedEpisode) {
-            const url = CRClient.shared.urlForEpisode(selectedEpisode)!;
-            clipboard.writeSync(url);
+            clipboard.writeSync(selectedEpisode.videoURL!);
         }
         // Update filename for selected episode
         // if already downloaded with partially correct name
