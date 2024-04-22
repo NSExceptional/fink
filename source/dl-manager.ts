@@ -200,6 +200,7 @@ export class DownloadManager {
     }
     
     async downloadAll(episodes: Episode[]) {
+        episodes.forEach(this.addDownloadMetadataToEpisode.bind(this));
         
         // Ignore queued episodes and failed episodes
         episodes = episodes.filter(e => {

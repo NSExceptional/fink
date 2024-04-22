@@ -162,7 +162,7 @@ export class Select {
         return eps.map(s => {
             // Show a * in front of queued episodes
             const name = s.downloading ? '*' + s.title : s.title;
-            return { label: name, value: s.slugTitle }
+            return { label: name, value: s.id }
         });
     }
 }

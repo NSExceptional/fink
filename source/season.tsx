@@ -31,7 +31,7 @@ export function SeasonPage(props: React.PropsWithChildren<{}>) {
     
     function episodeFor(item: SelectOption): Episode | undefined {
         if (item.value == '*') return undefined;
-        return episodes?.filter(e => e.slugTitle == item.value)[0];
+        return episodes?.filter(e => e.id == item.value)[0];
     }
     
     function downloadAll() {
@@ -86,7 +86,7 @@ export function SeasonPage(props: React.PropsWithChildren<{}>) {
         
         // Add button to download all episodes
         const allItem = { label: 'Download All', value: '*' };
-        const selectItems = [allItem].concat(Select.episodes(episodes));
+        const selectItems: SelectOption[] = [allItem].concat(Select.episodes(episodes));
         
         return <SelectInput limit={10} items={selectItems} onSelect={(item) => {
             // Did we select the 'All' item?
