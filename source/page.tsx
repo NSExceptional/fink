@@ -37,7 +37,7 @@ export function Page(props: React.PropsWithChildren<PageProps>) {
             </Box>
         </Box>
         <Divider width={w - 4} padding={0} />
-        <UL items={context.state.status!} />
+        <UL items={context.state.status!.slice(0,3)} />
         <Text>{DownloadManager.shared.currentDirectory}  | ^D change directory</Text>
     </Box>;
 }
