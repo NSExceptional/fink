@@ -86,7 +86,6 @@ export class CRClient {
         // https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#crunchyrollbeta-crunchyroll
         return [...loginArgs,
             '--extractor-args', 'crunchyrollbeta:format=download_hls',
-            '--format', 'bestvideo+bestaudio[language=en-US]',
             // '--format', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
             '--write-subs', '--sub-lang', 'en-US',
             '--no-check-certificate',
@@ -274,7 +273,8 @@ export class CRClient {
         }
         
         const exe = this.ytdlPath;
-        const args = [...this.ytdlArgs, episode.videoURL!];
+        const formatArgs = ['--format', `bestvideo+bestaudio[language=${episode.audioLocale}]`];
+        const args = [...this.ytdlArgs, ...formatArgs, episode.videoURL!];
         
         // Add output directory if specified
         if (episode.preferredDownloadPath) {
