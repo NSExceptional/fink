@@ -21,10 +21,19 @@ interface AppState {
     status?: string[];
     /** The current search string */
     query?: string;
+    /** The search results */
+    searchResults?: Show[];
     /** The currently selected show */
     show?: Show;
+    /** The seasons of the currently selected show */
+    showSeasons?: Season[];
     /** The currently selected season */
     season?: Season;
+    
+    /** The last-selected index in the search results */
+    resultsIndex?: number;
+    /** The last-selected index in the seasons list for the selected show */
+    seasonIndex?: number;
     
     /** Whether we are changing the working directory */
     cd: boolean;
@@ -40,8 +49,14 @@ interface IAppContext {
         status: Setter<string[]>,
         cd: Setter<boolean>;
         query: Setter<string>;
-        show: Setter<Show>;
-        season: Setter<Season>;
+        searchResults: Setter<Show[] | undefined>;
+        show: Setter<Show | undefined>;
+        showSeasons: Setter<Season[] | undefined>;
+        season: Setter<Season | undefined>;
+        index: {
+            results: Setter<number>;
+            season: Setter<number>;
+        }
     }
 }
 
@@ -51,7 +66,19 @@ export const AppContext = React.createContext<IAppContext>({
     state: EmptyAppState,
     addDownload: VoidSetter,
     downloadAll: VoidSetter,
-    set: { status: VoidSetter, cd: VoidSetter, query: VoidSetter, show: VoidSetter, season: VoidSetter }
+    set: {
+        status: VoidSetter,
+        cd: VoidSetter,
+        query: VoidSetter,
+        searchResults: VoidSetter,
+        show: VoidSetter,
+        showSeasons: VoidSetter,
+        season: VoidSetter,
+        index: {
+            results: VoidSetter,
+            season: VoidSetter,
+        },
+    }
 });
 
 function App() {
@@ -72,19 +99,33 @@ function App() {
         },
         set: {
             status: (status) => {
-                setState({ status: status });
+                setState({ status });
             },
             cd: (flag) => {
                 setState({ cd: flag })
             },
-            query: (string) => {
-                setState({ query: string })
+            query: (query) => {
+                setState({ query, searchResults: undefined })
+            },
+            searchResults: (searchResults) => {
+                setState({ searchResults })
             },
             show: (show) => {
-                setState({ show: show })
+                setState({ show })
+            },
+            showSeasons: (showSeasons) => {
+                setState({ showSeasons })
             },
             season: (season) => {
-                setState({ season: season })
+                setState({ season })
+            },
+            index: {
+                results: (resultsIndex) => {
+                    setState({ resultsIndex })
+                },
+                season: (seasonIndex) => {
+                    setState({ seasonIndex })
+                }
             }
         }
     };
@@ -123,12 +164,10 @@ function App() {
         }
         else if (state.show) {
             if (state.season) {
-                setState({ season: undefined });
+                setState({ season: undefined, seasonIndex: undefined });
             } else {
-                setState({ show: undefined });
+                setState({ show: undefined, showSeasons: undefined });
             }
-        } else {
-            setState({ query: undefined });
         }
     }
     

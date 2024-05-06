@@ -13,13 +13,13 @@ import { Text, useInput } from 'ink';
 import SelectInput from 'ink-select-input';
 import { AppContext } from './app';
 import { CRClient } from './api/client.js';
-import { DownloadManager } from './dl-manager.js';
 
 export function ShowPage(props: React.PropsWithChildren<{}>) {
     const context = useContext(AppContext);
     const show: Show = context.state.show!;
-    const [selectedSeason, setSelectedSeason] = useState<Season|undefined>(undefined);
-    const [seasons, setSeasons] = useState<Season[]|undefined>(undefined);
+    const [seasonIndex, setSeasonIndex] = [context.state.seasonIndex ?? 0, context.set.index.season];
+    const [selectedSeason, setSelectedSeason] = [context.state.season, context.set.season];
+    const [seasons, setSeasons] = [context.state.showSeasons, context.set.showSeasons];
     const [loading, setLoading] = useState(false);
     
     // Keyboard shortcuts
@@ -47,12 +47,12 @@ export function ShowPage(props: React.PropsWithChildren<{}>) {
         }
         
         const selectItems = Select.seasons(seasons);
-        return <SelectInput limit={10} items={selectItems} onSelect={(item) => {
+        return <SelectInput limit={10} items={selectItems} initialIndex={seasonIndex} onSelect={(item) => {
             const choice = seasonFor(item)!;
-            context.set.season(choice);
+            setSelectedSeason(choice);
         }}
         onHighlight={(item) => {
-            setSelectedSeason(seasonFor(item));
+            setSeasonIndex(selectItems.indexOf(item));
         }}/>
     }
     
